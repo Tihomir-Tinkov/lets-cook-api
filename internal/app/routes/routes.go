@@ -61,17 +61,18 @@ func (r *Router) registerRoutes() {
 			path = fmt.Sprintf("/%s%s", r.prefix, path)
 		}
 
-		r.mux.HandleFunc(path, r.recoverer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			if h, ok := route.Methods[req.Method]; ok {
+		for method, handler := range route.Methods {
+			pattern := fmt.Sprintf("%s %s", method, path)
+
+			r.mux.HandleFunc(pattern, r.recoverer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				if r.loggerMiddleware {
-					middleware.LoggerMiddleware(h)(w, req)
+					middleware.LoggerMiddleware(handler)(w, req)
 					return
 				}
-				h(w, req)
-				return
-			}
-			r.methodNotAllowedHandler(w, req)
-		})))
+
+				handler(w, req)
+			})))
+		}
 	}
 }
 

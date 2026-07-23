@@ -82,38 +82,33 @@ var controllerConstructors = map[string]ControllerConstructor{
 		ctl := controllers.NewServiceController(app.TypedServices.Healthcheck)
 		routes.RegisterServiceRoutes(app.Router, ctl)
 	},
+
 	"images": func(app *App) {
 		ctl := controllers.NewImageController(app.TypedServices.ImageService)
 		routes.RegisterImagesRoutes(app.Router, ctl)
 	},
+
+	"user": func(app *App) {
+		ctl := controllers.NewUserController(app.TypedServices.User)
+		routes.RegisterUserRoutes(app.Router, ctl)
+	},
 }
 
 func (a *App) bootstrap() {
+	userRepository := repositories.NewUserRepository(a.DB)
 	// Instantiate typed repositories directly
 	a.TypedRepos = &TypedRepositories{
 		ImageRepository: repositories.NewImageRepository(a.DB),
 		FileStorage:     repositories.NewLocalStorage(a.Config.StorePath),
+		User:            userRepository,
 	}
-	//	Zones:              repositories.NewZonesRepository(a.DB.GPS),
-	//	GroupZones:         repositories.NewGroupZoneRepository(a.DB.GPS),
-	//	Objects:            repositories.NewObjectRepository(a.DB.GPS).(*repositories.ObjectRepository),
-	//	Roles:              repositories.NewRoleRepository(a.DB.GPS),
-	//	Notifications:      repositories.NewNotificationRepository(a.DB.GPS),
-	//	Permissions:        repositories.NewPermissionRepository(a.DB.GPS),
-	//	Sensors:            repositories.NewRepository(api.New(a.Config.API.Reporting)),
-	//	GroupAlarms:        repositories.NewGroupAlarmRepository(api.New(a.Config.API.Alarms)),
-	//	ObjectDevice:       repositories.NewObjectDeviceRepository(a.DB.GPS),
-	//	ObjectMobilisights: repositories.NewObjectMobilisightsRepository(a.DB.GPS),
-	//	ObjectJimi:         repositories.NewJimiRepository(a.DB.GPS, a.Redis.Jimi),
-	//	JimiAlarmLogs:      repositories.NewJimiAlarmLogRepository(a.DB.GPS),
-	//	JimiInstructLogs:   repositories.NewJimiInstructLogRepository(a.DB.GPS),
-	//}
 
 	healthProbe := gateways.NewHealth(a.DB)
 
 	a.TypedServices = &TypedServices{
 		Healthcheck:  services.NewHealthCheckService(healthProbe),
 		ImageService: services.NewImageService(a.TypedRepos.ImageRepository, a.TypedRepos.FileStorage),
+		User:         services.NewUserService(userRepository),
 	}
 
 	for _, constructor := range controllerConstructors {

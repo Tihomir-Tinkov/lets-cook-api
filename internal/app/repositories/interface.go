@@ -8,6 +8,7 @@ import (
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/ports"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,8 +20,8 @@ type BaseRepository interface {
 }
 
 type RepositoryInterface[T models.Model] interface {
-	Find(ctx context.Context, id int32) (T, error)
-	GetAllByID(ctx context.Context, ids []int32) ([]T, error)
+	Find(ctx context.Context, id uuid.UUID) (T, error)
+	GetAllByID(ctx context.Context, ids []uuid.UUID) ([]T, error)
 	FindAll(ctx context.Context, conditions []ports.SimpleCondition) ([]T, error)
 	Model() T
 }

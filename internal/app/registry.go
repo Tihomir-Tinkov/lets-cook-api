@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/ports"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
 )
@@ -16,9 +17,11 @@ type ControllerConstructor func(app *App)
 type TypedRepositories struct {
 	ImageRepository *repositories.ImageRepository
 	FileStorage     *repositories.LocalStorage
+	User            *repositories.UserRepository
 }
 
 type TypedServices struct {
 	Healthcheck  *services.HealthCheckService
 	ImageService *services.ImageService
+	User         ports.UserService
 }
