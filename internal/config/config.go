@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	Logger LoggerConfig   `envPrefix:"LOG_"`
-	Env    string         `env:"ENV"`
-	Server ServerConfig   `envPrefix:"API_"`
-	Routes RoutesConfig   `envPrefix:"ROUTES_"`
-	DB     PostgresConfig `envPrefix:"DB_"`
+	Logger    LoggerConfig   `envPrefix:"LOG_"`
+	Env       string         `env:"ENV"`
+	Server    ServerConfig   `envPrefix:"API_"`
+	Routes    RoutesConfig   `envPrefix:"ROUTES_"`
+	DB        PostgresConfig `envPrefix:"DB_"`
+	StorePath string         `envPrefix:"STORE_PATH_" envDefault:"storage"`
 }
 
 type ServerConfig struct {

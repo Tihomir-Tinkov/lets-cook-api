@@ -1,4 +1,3 @@
-// app/registry.go
 package app
 
 import (
@@ -15,21 +14,11 @@ type ServiceConstructor func(app *App) interface{}
 type ControllerConstructor func(app *App)
 
 type TypedRepositories struct {
-	//Zones              *repositories.ZoneRepository
-	//GroupZones         *repositories.GroupZoneRepository
-	//Objects            *repositories.ObjectRepository
-	//Roles              *repositories.RoleRepository
-	//Notifications      *repositories.NotificationRepository
-	//Permissions        *repositories.PermissionRepository
-	//Sensors            *repositories.SensorRepository
-	//GroupAlarms        *repositories.GroupAlarmRepository
-	//ObjectDevice       *repositories.ObjectDeviceRepository
-	//ObjectMobilisights *repositories.ObjectMobilisightsRepository
-	//ObjectJimi         *repositories.JimiRepository
-	//JimiAlarmLogs      *repositories.JimiAlarmLogRepository
-	//JimiInstructLogs   *repositories.JimiInstructLogRepository
+	ImageRepository *repositories.ImageRepository
+	FileStorage     *repositories.LocalStorage
 }
 
 type TypedServices struct {
-	Healthcheck *services.HealthCheckService
+	Healthcheck  *services.HealthCheckService
+	ImageService *services.ImageService
 }

@@ -12,6 +12,7 @@ import (
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
 	gateways "github.com/Tihomir-Tinkov/cooking-site-project/internal/app/gateway"
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/routes"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/cache"
@@ -81,11 +82,18 @@ var controllerConstructors = map[string]ControllerConstructor{
 		ctl := controllers.NewServiceController(app.TypedServices.Healthcheck)
 		routes.RegisterServiceRoutes(app.Router, ctl)
 	},
+	"images": func(app *App) {
+		ctl := controllers.NewImageController(app.TypedServices.ImageService)
+		routes.RegisterImagesRoutes(app.Router, ctl)
+	},
 }
 
 func (a *App) bootstrap() {
 	// Instantiate typed repositories directly
-	//a.TypedRepos = &TypedRepositories{
+	a.TypedRepos = &TypedRepositories{
+		ImageRepository: repositories.NewImageRepository(a.DB),
+		FileStorage:     repositories.NewLocalStorage(a.Config.StorePath),
+	}
 	//	Zones:              repositories.NewZonesRepository(a.DB.GPS),
 	//	GroupZones:         repositories.NewGroupZoneRepository(a.DB.GPS),
 	//	Objects:            repositories.NewObjectRepository(a.DB.GPS).(*repositories.ObjectRepository),
@@ -104,7 +112,8 @@ func (a *App) bootstrap() {
 	healthProbe := gateways.NewHealth(a.DB)
 
 	a.TypedServices = &TypedServices{
-		Healthcheck: services.NewHealthCheckService(healthProbe),
+		Healthcheck:  services.NewHealthCheckService(healthProbe),
+		ImageService: services.NewImageService(a.TypedRepos.ImageRepository, a.TypedRepos.FileStorage),
 	}
 
 	for _, constructor := range controllerConstructors {

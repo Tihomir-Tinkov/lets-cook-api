@@ -1,2 +1,37 @@
 GET http://localhost:8082/api/healthcheck
 
+###
+
+POST http://localhost:8082/api/images
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="Banica.webp"
+
+< ./doc/Banica.webp
+--WebAppBoundary--
+###
+
+POST http://localhost:8082/api/images
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="ShopskaSlata.png"
+
+< ./doc/ShopskaSlata.png
+--WebAppBoundary--
+###
+
+POST http://localhost:8082/api/images
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="Banica.jpg"
+
+< ./doc/Banica.jpg
+--WebAppBoundary--
+###
+
+DELETE http://localhost:8082/api/images/<:ID>
+
+###
