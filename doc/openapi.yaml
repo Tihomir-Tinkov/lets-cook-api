@@ -1,0 +1,747 @@
+openapi: 3.2.0
+info:
+  title: Cookbook
+  description: |
+    This is a sample Cooking Website Server based on the OpenAPI 3.2 specification.
+  version: 1.0.0
+tags:
+  - name: Recipes
+  - name: Images
+  - name: Comments
+  - name: Authentication
+paths:
+  /recipes:
+    get:
+      tags:
+        - Recipes
+      operationId: getRecipes
+      summary: Get recipes
+      parameters:
+        - name: search
+          in: query
+          description: Search by title, description or ingredients
+          schema:
+            type: string
+
+        - name: sort
+          in: query
+          description: Sort field
+          schema:
+            type: string
+            enum:
+              - newest
+              - rating
+              - prepTime
+
+        - name: order
+          in: query
+          description: Sort direction
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 12
+            minimum: 1
+
+        - name: minRating
+          in: query
+          schema:
+            type: number
+            minimum: 0
+            maximum: 5
+
+        - name: maxPrepTime
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+
+      responses:
+        "200":
+          description: Recipes successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeSummaryList"
+
+        "400":
+          description: Invalid query parameters
+
+        "500":
+          description: Internal server error
+
+    post:
+      tags:
+        - Recipes
+      operationId: createRecipe
+      summary: Create a recipe
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeCreateRequest"
+
+      responses:
+        "201":
+          description: Recipe successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeDetails"
+
+        "400":
+          description: Invalid request
+
+        "401":
+          description: Authentication required
+
+        "500":
+          description: Internal server error
+
+  /recipes/{id}:
+    get:
+      tags:
+        - Recipes
+      operationId: getRecipeById
+      summary: Get recipe details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Recipe successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeDetails"
+
+        "404":
+          description: Recipe not found
+
+        "500":
+          description: Internal server error
+
+    put:
+      tags:
+        - Recipes
+      operationId: updateRecipe
+      summary: Update a recipe
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecipeUpdateRequest"
+
+      responses:
+        "200":
+          description: Recipe successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecipeDetails"
+
+        "400":
+          description: Invalid request
+
+        "401":
+          description: Authentication required
+
+        "403":
+          description: User is not the recipe owner or an administrator
+
+        "404":
+          description: Recipe not found
+
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - Recipes
+      operationId: deleteRecipe
+      summary: Delete a recipe
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+
+      responses:
+        "204":
+          description: Recipe successfully deleted
+
+        "401":
+          description: Authentication required
+
+        "403":
+          description: User is not the recipe owner or an administrator
+
+        "404":
+          description: Recipe not found
+
+        "500":
+          description: Internal server error
+
+  /recipes/{id}/images:
+    post:
+      tags:
+        - Images
+      operationId: addRecipeImage
+      summary: Add an image to a recipe
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                altText:
+                  type: string
+      responses:
+        "201":
+          description: Image added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Image"
+        "400":
+          description: Invalid request
+        "401":
+          description: Authentication required
+        "403":
+          description: User is not the recipe owner or an administrator
+        "404":
+          description: Recipe not found
+        "500":
+          description: Internal server error
+
+  /recipes/{id}/images/{imageId}:
+    delete:
+      tags:
+        - Images
+      operationId: deleteRecipeImage
+      summary: Delete an image from a recipe
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+
+        - name: imageId
+          in: path
+          required: true
+          description: Image ID
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Image deleted successfully
+        "401":
+          description: Authentication required
+        "403":
+          description: User is not the recipe owner or an administrator
+        "404":
+          description: Recipe or image not found
+        "500":
+          description: Internal server error
+
+  /recipes/{id}/comments:
+    get:
+      tags:
+        - Comments
+      operationId: getRecipeComments
+      summary: Get comments for a recipe
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comments successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        "404":
+          description: Recipe not found
+        "500":
+          description: Internal server error
+
+    post:
+      tags:
+        - Comments
+      operationId: createRecipeComment
+      summary: Add a comment and rating to a recipe
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentCreateRequest"
+      responses:
+        "201":
+          description: Comment successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          description: Invalid request
+        "401":
+          description: Authentication required
+        "404":
+          description: Recipe not found
+        "409":
+          description: User has already commented on this recipe
+        "500":
+          description: Internal server error
+
+  /recipes/{id}/comments/{commentId}:
+    put:
+      tags:
+        - Comments
+      operationId: updateRecipeComment
+      summary: Update a comment and rating
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          description: Comment ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentUpdateRequest"
+      responses:
+        "200":
+          description: Comment successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          description: Invalid request
+        "401":
+          description: Authentication required
+        "403":
+          description: User is not the comment owner or an administrator
+        "404":
+          description: Recipe or comment not found
+        "500":
+          description: Internal server error
+
+    delete:
+      tags:
+        - Comments
+      operationId: deleteRecipeComment
+      summary: Delete a comment and rating
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Recipe ID
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          description: Comment ID
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Comment successfully deleted
+        "401":
+          description: Authentication required
+        "403":
+          description: User is not the comment owner or an administrator
+        "404":
+          description: Recipe or comment not found
+        "500":
+          description: Internal server error
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      operationId: registerUser
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid request
+        "409":
+          description: Email already registered
+        "500":
+          description: Internal server error
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      operationId: loginUser
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Invalid request
+        "401":
+          description: Invalid email or password
+        "500":
+          description: Internal server error
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      operationId: logoutUser
+      summary: Log out the current user
+      security:
+        - BearerAuth: []
+      responses:
+        "204":
+          description: Successfully logged out
+        "401":
+          description: Authentication required
+        "500":
+          description: Internal server error
+
+components:
+  schemas:
+    RecipeSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        image:
+          $ref: "#/components/schemas/Image"
+        prepTime:
+          type: integer
+        servings:
+          type: integer
+        difficulty:
+          type: integer
+        rating:
+          type: number
+          format: float
+        ratingsCount:
+          type: integer
+        author:
+          $ref: "#/components/schemas/UserSummary"
+
+    RecipeSummaryList:
+      type: object
+      required:
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
+        - recipes
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        recipes:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecipeSummary"
+
+    RecipeDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+        prepTime:
+          type: integer
+        servings:
+          type: integer
+        difficulty:
+          type: integer
+        rating:
+          type: number
+          format: float
+        ratingsCount:
+          type: integer
+        author:
+          $ref: "#/components/schemas/UserSummary"
+        description:
+          type: string
+        ingredients:
+          type: string
+        instructions:
+          type: string
+        comments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Comment"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    RecipeCreateRequest:
+      type: object
+      required:
+        - title
+        - prepTime
+        - servings
+        - difficulty
+        - description
+        - ingredients
+        - instructions
+      properties:
+        title:
+          type: string
+        prepTime:
+          type: integer
+        servings:
+          type: integer
+        difficulty:
+          type: integer
+        description:
+          type: string
+        ingredients:
+          type: string
+        instructions:
+          type: string
+
+    RecipeUpdateRequest:
+      allOf:
+        - $ref: "#/components/schemas/RecipeCreateRequest"
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        author:
+          $ref: "#/components/schemas/UserSummary"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CommentCreateRequest:
+      type: object
+      required:
+        - rating
+        - comment
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+
+    CommentUpdateRequest:
+      allOf:
+        - $ref: "#/components/schemas/CommentCreateRequest"
+
+    Image:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        altText:
+          type: string
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum:
+            - user
+            - admin
+
+    RegisterRequest:
+      type: object
+      required:
+        - displayName
+        - email
+        - password
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
