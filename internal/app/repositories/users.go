@@ -18,66 +18,140 @@ type UserRepository struct {
 }
 
 func NewUserRepository(db *pgxpool.Pool) *UserRepository {
-	return &UserRepository{
-		db: db,
-	}
-}
-
-func (r *UserRepository) Type() reflect.Type {
-	return reflect.TypeOf(models.User{})
+	return &UserRepository{db: db}
 }
 
 func (r *UserRepository) DB() *pgxpool.Pool {
 	return r.db
 }
 
-func (r *UserRepository) Model() models.Model {
-	return models.User{}
+func (r *UserRepository) Model() *models.User {
+	return &models.User{}
 }
 
-func (r *UserRepository) Find(
-	ctx context.Context,
-	id uuid.UUID,
-) (models.User, error) {
+func (r *UserRepository) Type() reflect.Type {
+	return reflect.TypeOf(models.User{})
+}
 
-	query := `
-		SELECT
-			id,
+func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
+	err := r.db.QueryRow(ctx,
+		`INSERT INTO users (
 			display_name,
 			email,
 			password_hash,
-			role,
-			created_at,
-			updated_at
-		FROM users
-		WHERE id = @id
-	`
+			role
+		 ) VALUES ($1,$2,$3,$4)
+		 RETURNING id`,
+		user.DisplayName,
+		user.Email,
+		user.PasswordHash,
+		user.Role,
+	).Scan(&user.ID)
+	return err
+}
 
-	args := pgx.NamedArgs{
-		"id": id,
-	}
-
-	row := r.db.QueryRow(ctx, query, args)
-
-	var user models.User
-
-	err := row.Scan(
-		&user.ID,
-		&user.DisplayName,
-		&user.Email,
-		&user.PasswordHash,
-		&user.Role,
-		&user.CreatedAt,
-		&user.UpdatedAt,
+func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	rows, err := r.db.Query(
+		ctx,
+		`SELECT *
+		 FROM users
+		 WHERE id = $1`,
+		id,
 	)
 
-	if errors.Is(err, pgx.ErrNoRows) {
-		return models.User{}, ErrUserNotFound
+	if err != nil {
+		return nil, err
 	}
+
+	user, err := pgx.CollectOneRow(
+		rows,
+		pgx.RowToStructByName[models.User],
+	)
 
 	if err != nil {
-		return models.User{}, err
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+
+		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
+}
+
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	rows, err := r.db.Query(
+		ctx,
+		`SELECT *
+		 FROM users
+		 WHERE email = $1`,
+		email,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := pgx.CollectOneRow(
+		rows,
+		pgx.RowToStructByName[models.User],
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrUserNotFound
+		}
+
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
+	result, err := r.db.Exec(
+		ctx,
+		`UPDATE users
+		 SET
+			display_name = $2,
+			email = $3,
+			password_hash = $4,
+			role = $5,
+			updated_at = NOW()
+		 WHERE id = $1`,
+		user.ID,
+		user.DisplayName,
+		user.Email,
+		user.PasswordHash,
+		user.Role,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}
+
+func (r *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	result, err := r.db.Exec(
+		ctx,
+		`DELETE FROM users
+		 WHERE id = $1`,
+		id,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
 }

@@ -14,13 +14,13 @@ const (
 )
 
 type User struct {
-	ID           uuid.UUID
-	DisplayName  string
-	Email        string
-	PasswordHash string
-	Role         UserRole
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID           uuid.UUID `json:"id" db:"id"`
+	DisplayName  string    `json:"displayName" db:"display_name"`
+	Email        string    `json:"-" db:"email"`
+	PasswordHash string    `json:"-" db:"password_hash"`
+	Role         UserRole  `json:"role" db:"role"`
+	CreatedAt    time.Time `json:"-" db:"created_at"`
+	UpdatedAt    time.Time `json:"-" db:"updated_at"`
 }
 
 func (User) Table() string {
