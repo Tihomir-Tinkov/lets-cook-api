@@ -5,7 +5,7 @@ CREATE TABLE recipes (
     author_id UUID NOT NULL,
 
     title VARCHAR(255) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
 
     ingredients TEXT NOT NULL,
     instructions TEXT NOT NULL,
