@@ -15,6 +15,7 @@ type Config struct {
 	Routes    RoutesConfig   `envPrefix:"ROUTES_"`
 	DB        PostgresConfig `envPrefix:"DB_"`
 	StorePath string         `envPrefix:"STORE_PATH_" envDefault:"storage"`
+	JWT       JWTConfig      `envPrefix:"JWT_"`
 }
 
 type ServerConfig struct {
@@ -46,6 +47,11 @@ type PostgresConfig struct {
 
 type CorsConfig struct {
 	AllowOrigins string `env:"ALLOW_ORIGINS"`
+}
+
+type JWTConfig struct {
+	Secret     string        `env:"SECRET"`
+	Expiration time.Duration `env:"EXPIRATION" envDefault:"24h"`
 }
 
 func (cfg *Config) Parse() error {

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/adapters"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
 	gateways "github.com/Tihomir-Tinkov/cooking-site-project/internal/app/gateway"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
@@ -28,6 +29,7 @@ type App struct {
 	Router        *routes.Router
 	Server        *http.Server
 	TypedRepos    *TypedRepositories
+	TypedAdapters *TypedAdapters
 	TypedServices *TypedServices
 	Cache         *cache.TokenCache
 	Config        config.Config
@@ -89,26 +91,30 @@ var controllerConstructors = map[string]ControllerConstructor{
 	},
 
 	"user": func(app *App) {
-		ctl := controllers.NewUserController(app.TypedServices.User)
+		ctl := controllers.NewUserController(app.TypedServices.UserService)
 		routes.RegisterUserRoutes(app.Router, ctl)
 	},
 }
 
 func (a *App) bootstrap() {
-	userRepository := repositories.NewUserRepository(a.DB)
 	// Instantiate typed repositories directly
 	a.TypedRepos = &TypedRepositories{
+		UserRepository:  repositories.NewUserRepository(a.DB),
 		ImageRepository: repositories.NewImageRepository(a.DB),
 		FileStorage:     repositories.NewLocalStorage(a.Config.StorePath),
-		User:            userRepository,
 	}
 
 	healthProbe := gateways.NewHealth(a.DB)
 
+	a.TypedAdapters = &TypedAdapters{
+		PasswordHasher: adapters.NewPasswordHasher(),
+		TokenProvider:  adapters.NewJWTProvider(a.Config.JWT.Secret, a.Config.JWT.Expiration),
+	}
+
 	a.TypedServices = &TypedServices{
 		Healthcheck:  services.NewHealthCheckService(healthProbe),
 		ImageService: services.NewImageService(a.TypedRepos.ImageRepository, a.TypedRepos.FileStorage),
-		User:         services.NewUserService(userRepository),
+		UserService:  services.NewUserService(a.TypedRepos.UserRepository, a.TypedAdapters.PasswordHasher, a.TypedAdapters.TokenProvider),
 	}
 
 	for _, constructor := range controllerConstructors {

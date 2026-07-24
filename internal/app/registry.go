@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/ports"
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/adapters"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
 )
@@ -15,13 +15,18 @@ type ServiceConstructor func(app *App) interface{}
 type ControllerConstructor func(app *App)
 
 type TypedRepositories struct {
+	UserRepository  *repositories.UserRepository
 	ImageRepository *repositories.ImageRepository
 	FileStorage     *repositories.LocalStorage
-	User            *repositories.UserRepository
 }
 
 type TypedServices struct {
 	Healthcheck  *services.HealthCheckService
+	UserService  *services.UserService
 	ImageService *services.ImageService
-	User         ports.UserService
+}
+
+type TypedAdapters struct {
+	PasswordHasher *adapters.PasswordHasher
+	TokenProvider  *adapters.JWTProvider
 }
