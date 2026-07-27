@@ -98,7 +98,7 @@ func (s *UserService) Login(
 		return "", ErrInvalidCredentials
 	}
 
-	token, err := s.tokens.Generate(user.ID)
+	token, err := s.tokens.Generate(user.ID, user.Role)
 
 	if err != nil {
 		return "", err

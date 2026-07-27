@@ -1,6 +1,7 @@
 package ports
 
 import (
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
 	"github.com/google/uuid"
 )
 
@@ -10,6 +11,6 @@ type PasswordHasher interface {
 }
 
 type TokenProvider interface {
-	Generate(userID uuid.UUID) (string, error)
-	Validate(token string) (uuid.UUID, error)
+	Generate(userID uuid.UUID, role models.UserRole) (string, error)
+	Validate(token string) (*models.AuthContext, error)
 }

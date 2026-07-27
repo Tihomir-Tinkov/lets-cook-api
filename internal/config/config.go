@@ -14,8 +14,9 @@ type Config struct {
 	Server    ServerConfig   `envPrefix:"API_"`
 	Routes    RoutesConfig   `envPrefix:"ROUTES_"`
 	DB        PostgresConfig `envPrefix:"DB_"`
-	StorePath string         `envPrefix:"STORE_PATH_" envDefault:"storage"`
+	StorePath string         `env:"STORE_PATH" envDefault:"storage"`
 	JWT       JWTConfig      `envPrefix:"JWT_"`
+	Argon2    Argon2Config   `envPrefix:"ARGON2_"`
 }
 
 type ServerConfig struct {
@@ -51,7 +52,16 @@ type CorsConfig struct {
 
 type JWTConfig struct {
 	Secret     string        `env:"SECRET"`
+	Issuer     string        `env:"ISSUER" envDefault:"cooking-site-api"`
 	Expiration time.Duration `env:"EXPIRATION" envDefault:"24h"`
+}
+
+type Argon2Config struct {
+	Memory      uint32 `env:"MEMORY" envDefault:"65536"`
+	Iterations  uint32 `env:"ITERATIONS" envDefault:"3"`
+	Parallelism uint8  `env:"PARALLELISM" envDefault:"4"`
+	SaltLength  uint32 `env:"SALT_LENGTH" envDefault:"16"`
+	KeyLength   uint32 `env:"KEY_LENGTH" envDefault:"32"`
 }
 
 func (cfg *Config) Parse() error {

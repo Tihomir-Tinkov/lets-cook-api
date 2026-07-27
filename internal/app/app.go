@@ -72,7 +72,9 @@ func NewApp(cfg config.Config) (*App, error) {
 	app.Cache = cache.NewTokenCache()
 	app.Cache.Cleanup(1 * time.Hour) // lower the time according to the fastest expiring token
 
-	app.bootstrap()
+	if err := app.bootstrap(); err != nil {
+		return nil, err
+	}
 
 	return app, nil
 }
@@ -96,7 +98,7 @@ var controllerConstructors = map[string]ControllerConstructor{
 	},
 }
 
-func (a *App) bootstrap() {
+func (a *App) bootstrap() error {
 	// Instantiate typed repositories directly
 	a.TypedRepos = &TypedRepositories{
 		UserRepository:  repositories.NewUserRepository(a.DB),
@@ -106,9 +108,21 @@ func (a *App) bootstrap() {
 
 	healthProbe := gateways.NewHealth(a.DB)
 
+	hasher, err := adapters.NewArgon2Hasher(adapters.Argon2Config(a.Config.Argon2))
+
+	if err != nil {
+		return err
+	}
+
+	jwtprovider, err := adapters.NewJWTProvider(a.Config.JWT.Secret, a.Config.JWT.Issuer, a.Config.JWT.Expiration)
+
+	if err != nil {
+		return err
+	}
+
 	a.TypedAdapters = &TypedAdapters{
-		PasswordHasher: adapters.NewPasswordHasher(),
-		TokenProvider:  adapters.NewJWTProvider(a.Config.JWT.Secret, a.Config.JWT.Expiration),
+		PasswordHasher: hasher,
+		TokenProvider:  jwtprovider,
 	}
 
 	a.TypedServices = &TypedServices{
@@ -124,6 +138,8 @@ func (a *App) bootstrap() {
 	a.Router.RegisterRoutes()
 
 	a.Router.ListRoutes()
+
+	return nil
 }
 
 func (a *App) ServeAndListen() error {

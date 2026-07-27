@@ -27,6 +27,6 @@ type TypedServices struct {
 }
 
 type TypedAdapters struct {
-	PasswordHasher *adapters.PasswordHasher
+	PasswordHasher *adapters.Argon2Hasher
 	TokenProvider  *adapters.JWTProvider
 }

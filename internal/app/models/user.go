@@ -13,6 +13,11 @@ const (
 	RoleAdmin UserRole = "admin"
 )
 
+type AuthContext struct {
+	UserID uuid.UUID
+	Role   UserRole
+}
+
 type User struct {
 	ID           uuid.UUID `json:"id" db:"id"`
 	DisplayName  string    `json:"displayName" db:"display_name"`
