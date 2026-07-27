@@ -16,6 +16,14 @@ type UserRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
+type RecipeRepository interface {
+	Create(ctx context.Context, recipe *models.Recipe) error
+	GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error)
+	List(ctx context.Context, limit, offset int) ([]models.Recipe, error)
+	Update(ctx context.Context, recipe *models.Recipe) error
+	Delete(ctx context.Context, id uuid.UUID) error
+}
+
 type ImageRepository interface {
 	Create(ctx context.Context, image *models.Image) error
 	Get(ctx context.Context, id uuid.UUID) (*models.Image, error)
