@@ -4,34 +4,54 @@ import (
 	"net/http"
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
 )
 
-func RegisterUserRoutes(r *Router, ctl *controllers.UserController) {
+func RegisterUserRoutes(r *Router, ctl *controllers.UserController, authMiddleware *middleware.AuthMiddleware) {
 	userRoutes := []Route{
 		{
 			Path: "/auth/register",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodPost: ctl.Register,
+			Methods: map[string]Handler{
+				http.MethodPost: {
+					Func: ctl.Register,
+				},
 			},
 		},
 		{
 			Path: "/auth/login",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodPost: ctl.Login,
+			Methods: map[string]Handler{
+				http.MethodPost: {
+					Func: ctl.Login,
+				},
 			},
 		},
 		{
 			Path: "/auth/logout",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodPost: ctl.Logout,
+			Methods: map[string]Handler{
+				http.MethodPost: {
+					Func: ctl.Logout,
+				},
 			},
 		},
 		{
 			Path: "/users/{id}",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodGet:    ctl.GetByID,
-				http.MethodPut:    ctl.Update,
-				http.MethodDelete: ctl.Delete,
+			Methods: map[string]Handler{
+				http.MethodGet: {
+					Func: ctl.GetByID,
+				},
+				http.MethodPut: {
+					Func: ctl.Update,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+						//authMiddleware.RequireRole(models.RoleAdmin),
+					},
+				},
+				http.MethodDelete: {
+					Func: ctl.Delete,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+					},
+				},
 			},
 		},
 	}

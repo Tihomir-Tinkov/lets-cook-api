@@ -12,6 +12,7 @@ import (
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/adapters"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
 	gateways "github.com/Tihomir-Tinkov/cooking-site-project/internal/app/gateway"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/routes"
@@ -25,16 +26,17 @@ import (
 )
 
 type App struct {
-	DB            *pgxpool.Pool
-	Router        *routes.Router
-	Server        *http.Server
-	TypedRepos    *TypedRepositories
-	TypedAdapters *TypedAdapters
-	TypedServices *TypedServices
-	Cache         *cache.TokenCache
-	Config        config.Config
-	closeOnce     sync.Once
-	closeErr      error
+	DB             *pgxpool.Pool
+	Router         *routes.Router
+	AuthMiddleware *middleware.AuthMiddleware
+	Server         *http.Server
+	TypedRepos     *TypedRepositories
+	TypedAdapters  *TypedAdapters
+	TypedServices  *TypedServices
+	Cache          *cache.TokenCache
+	Config         config.Config
+	closeOnce      sync.Once
+	closeErr       error
 }
 
 func NewApp(cfg config.Config) (*App, error) {
@@ -89,12 +91,12 @@ var controllerConstructors = map[string]ControllerConstructor{
 
 	"images": func(app *App) {
 		ctl := controllers.NewImageController(app.TypedServices.ImageService)
-		routes.RegisterImagesRoutes(app.Router, ctl)
+		routes.RegisterImagesRoutes(app.Router, ctl, app.AuthMiddleware)
 	},
 
 	"user": func(app *App) {
 		ctl := controllers.NewUserController(app.TypedServices.UserService)
-		routes.RegisterUserRoutes(app.Router, ctl)
+		routes.RegisterUserRoutes(app.Router, ctl, app.AuthMiddleware)
 	},
 }
 
@@ -124,6 +126,8 @@ func (a *App) bootstrap() error {
 		PasswordHasher: hasher,
 		TokenProvider:  jwtprovider,
 	}
+
+	a.AuthMiddleware = middleware.NewAuthMiddleware(a.TypedAdapters.TokenProvider)
 
 	a.TypedServices = &TypedServices{
 		Healthcheck:  services.NewHealthCheckService(healthProbe),

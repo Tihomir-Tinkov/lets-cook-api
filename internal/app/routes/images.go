@@ -4,21 +4,34 @@ import (
 	"net/http"
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
 )
 
-func RegisterImagesRoutes(r *Router, ctl *controllers.ImageController) {
+func RegisterImagesRoutes(r *Router, ctl *controllers.ImageController, authMiddleware *middleware.AuthMiddleware) {
 	imagesRoutes := []Route{
 		{
 			Path: "/images",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodPost: ctl.Upload,
+			Methods: map[string]Handler{
+				http.MethodPost: {
+					Func: ctl.Upload,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+					},
+				},
 			},
 		},
 		{
 			Path: "/images/{id}",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodGet:    ctl.Download,
-				http.MethodDelete: ctl.Delete,
+			Methods: map[string]Handler{
+				http.MethodGet: {
+					Func: ctl.Download,
+				},
+				http.MethodDelete: {
+					Func: ctl.Delete,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+					},
+				},
 			},
 		},
 	}

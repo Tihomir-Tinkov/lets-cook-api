@@ -19,9 +19,16 @@ type Router struct {
 	loggerMiddleware        bool
 }
 
+type Middleware func(http.Handler) http.Handler
+
 type Route struct {
-	Methods map[string]http.HandlerFunc
 	Path    string
+	Methods map[string]Handler
+}
+
+type Handler struct {
+	Func        http.HandlerFunc
+	Middlewares []Middleware
 }
 
 func NewRouter(opts ...RouterOptFunc) *Router {
@@ -44,6 +51,17 @@ func (r *Router) RegisterRoutes() {
 	r.registerRoutes()
 }
 
+func applyMiddleware(
+	handler http.Handler,
+	middlewares ...Middleware,
+) http.Handler {
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		handler = middlewares[i](handler)
+	}
+
+	return handler
+}
+
 func (r *Router) registerRoutes() {
 
 	r.notFoundHandler = func(w http.ResponseWriter, req *http.Request) {
@@ -64,14 +82,17 @@ func (r *Router) registerRoutes() {
 		for method, handler := range route.Methods {
 			pattern := fmt.Sprintf("%s %s", method, path)
 
-			r.mux.HandleFunc(pattern, r.recoverer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				if r.loggerMiddleware {
-					middleware.LoggerMiddleware(handler)(w, req)
-					return
-				}
+			h := http.Handler(http.HandlerFunc(handler.Func))
 
-				handler(w, req)
-			})))
+			h = applyMiddleware(h, handler.Middlewares...)
+
+			if r.loggerMiddleware {
+				h = middleware.LoggerMiddleware(h.ServeHTTP)
+			}
+
+			h = r.recoverer(h)
+
+			r.mux.Handle(pattern, h)
 		}
 	}
 }

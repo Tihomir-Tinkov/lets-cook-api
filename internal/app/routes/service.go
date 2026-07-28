@@ -10,8 +10,10 @@ func RegisterServiceRoutes(r *Router, ctl *controllers.HealthController) {
 	serviceRoutes := []Route{
 		{
 			Path: "/healthcheck",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodGet: ctl.HealthCheck,
+			Methods: map[string]Handler{
+				http.MethodGet: {
+					Func: ctl.HealthCheck,
+				},
 			},
 		},
 	}

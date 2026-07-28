@@ -4,23 +4,43 @@ import (
 	"net/http"
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
+	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
 )
 
-func RegisterRecipeRoutes(r *Router, ctl *controllers.RecipeController) {
+func RegisterRecipeRoutes(r *Router, ctl *controllers.RecipeController, authMiddleware *middleware.AuthMiddleware) {
 	recipeRoutes := []Route{
 		{
 			Path: "/recipes/",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodGet:  ctl.List,
-				http.MethodPost: ctl.Create,
+			Methods: map[string]Handler{
+				http.MethodGet: {
+					Func: ctl.List,
+				},
+				http.MethodPost: {
+					Func: ctl.Create,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+					},
+				},
 			},
 		},
 		{
 			Path: "/recipes/{id}",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodGet:    ctl.GetByID,
-				http.MethodPut:    ctl.Update,
-				http.MethodDelete: ctl.Delete,
+			Methods: map[string]Handler{
+				http.MethodGet: {
+					Func: ctl.GetByID,
+				},
+				http.MethodPut: {
+					Func: ctl.Update,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+					},
+				},
+				http.MethodDelete: {
+					Func: ctl.Delete,
+					Middlewares: []Middleware{
+						authMiddleware.RequireAuth,
+					},
+				},
 			},
 		},
 	}
