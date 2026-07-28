@@ -69,7 +69,20 @@ func (r *RecipeRepository) Create(ctx context.Context, recipe *models.Recipe) er
 func (r *RecipeRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT *
+		`SELECT
+			id,
+			author_id,
+			title,
+			description,
+			ingredients,
+			instructions,
+			prep_time_min,
+			servings,
+			difficulty,
+			rating_avg,
+			rating_count,
+			created_at,
+			updated_at
 		 FROM recipes
 		 WHERE id = $1`,
 		id,
@@ -99,7 +112,20 @@ func (r *RecipeRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.R
 func (r *RecipeRepository) List(ctx context.Context, limit, offset int) ([]models.Recipe, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT *
+		`SELECT
+			id,
+			author_id,
+			title,
+			description,
+			ingredients,
+			instructions,
+			prep_time_min,
+			servings,
+			difficulty,
+			rating_avg,
+			rating_count,
+			created_at,
+			updated_at
 		 FROM recipes
 		 ORDER BY created_at DESC
 		 LIMIT $1 OFFSET $2`,

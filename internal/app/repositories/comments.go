@@ -36,7 +36,14 @@ func (r *CommentRepository) Type() reflect.Type {
 func (r *CommentRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.Comment, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT *
+		`SELECT
+			id,
+    		recipe_id,
+			author_id,
+			body,
+			rating,
+			created_at,
+			updated_at
 		 FROM comments
 		 WHERE id = $1`,
 		id,
@@ -63,14 +70,21 @@ func (r *CommentRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.
 	return &comment, nil
 }
 
-func (r *CommentRepository) GetByRecipeID(ctx context.Context, recipeId uuid.UUID) ([]models.Comment, error) {
+func (r *CommentRepository) GetByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]models.Comment, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT *
+		`SELECT
+			id,
+			recipe_id,
+			author_id,
+			body,
+			rating,
+			created_at,
+			updated_at
 		 FROM comments
 		 WHERE recipe_id = $1
 		 ORDER BY created_at DESC`,
-		recipeId,
+		recipeID,
 	)
 
 	if err != nil {

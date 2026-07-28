@@ -118,6 +118,7 @@ func (s *UserService) Update(
 	ctx context.Context,
 	userID uuid.UUID,
 	user *models.User,
+	password string,
 ) error {
 	//if user.ID != authUser.ID && authUser.Role != models.RoleAdmin
 	if user.ID != userID {
@@ -136,6 +137,16 @@ func (s *UserService) Update(
 		}
 	} else if !errors.Is(err, repositories.ErrUserNotFound) {
 		return err
+	}
+
+	if password != "" {
+		hash, err := s.hasher.Hash(password)
+
+		if err != nil {
+			return err
+		}
+
+		user.PasswordHash = hash
 	}
 
 	return s.repository.Update(ctx, user)

@@ -1,21 +1,16 @@
 package controllers
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/responses"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
-	"github.com/google/uuid"
 )
 
 var (
 	ErrInvalidUserID = errors.New("invalid user id")
-	ErrUnauthorized  = errors.New("unauthorized")
 )
 
 type UserController struct {
@@ -42,45 +37,7 @@ type loginRequest struct {
 type updateUserRequest struct {
 	DisplayName string `json:"display_name"`
 	Email       string `json:"email"`
-}
-
-func requireAuth(r *http.Request) (*models.AuthContext, error) {
-	auth, ok := middleware.GetAuthContext(r.Context())
-	if !ok {
-		return nil, ErrUnauthorized
-	}
-	return auth, nil
-}
-
-func parseUUIDPathParam(r *http.Request) (uuid.UUID, error) {
-
-	id := r.PathValue("id")
-
-	userID, err := uuid.Parse(id)
-
-	if err != nil {
-		return uuid.Nil, ErrInvalidUserID
-	}
-
-	return userID, nil
-}
-
-func decodeJSON(r *http.Request, dst any) error {
-	r.Body = http.MaxBytesReader(nil, r.Body, 1<<20) // 1 MB
-
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
-
-	if err := dec.Decode(dst); err != nil {
-		return err
-	}
-
-	var extra any
-	if err := dec.Decode(&extra); err != io.EOF {
-		return errors.New("request body must contain only one JSON object")
-	}
-
-	return nil
+	Password    string `json:"password"`
 }
 
 func (c *UserController) Register(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +112,7 @@ func (c *UserController) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
-	id, err := parseUUIDPathParam(r)
+	id, err := parseUUIDParam(r, "id")
 
 	if err != nil {
 		responses.JSONError(
@@ -190,7 +147,7 @@ func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
-	id, err := parseUUIDPathParam(r)
+	id, err := parseUUIDParam(r, "id")
 	if err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
@@ -206,7 +163,7 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		responses.JSONError(
 			w,
 			r,
-			errors.New("forbidden"),
+			ErrForbidden,
 			http.StatusForbidden,
 		)
 		return
@@ -220,6 +177,7 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := models.User{
+		ID:          auth.UserID,
 		DisplayName: req.DisplayName,
 		Email:       req.Email,
 	}
@@ -228,6 +186,7 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		r.Context(),
 		auth.UserID,
 		&user,
+		req.Password,
 	); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
@@ -237,7 +196,7 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := parseUUIDPathParam(r)
+	id, err := parseUUIDParam(r, "id")
 	if err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
@@ -246,6 +205,16 @@ func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 	auth, err := requireAuth(r)
 	if err != nil {
 		responses.JSONError(w, r, err, http.StatusUnauthorized)
+		return
+	}
+
+	if id != auth.UserID {
+		responses.JSONError(
+			w,
+			r,
+			ErrForbidden,
+			http.StatusForbidden,
+		)
 		return
 	}
 

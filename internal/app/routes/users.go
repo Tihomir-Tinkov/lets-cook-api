@@ -29,18 +29,8 @@ func RegisterUserRoutes(r *Router, ctl *controllers.UserController) {
 		{
 			Path: "/users/{id}",
 			Methods: map[string]http.HandlerFunc{
-				http.MethodGet: ctl.GetByID,
-			},
-		},
-		{
-			Path: "/users/{id}",
-			Methods: map[string]http.HandlerFunc{
-				http.MethodPut: ctl.Update,
-			},
-		},
-		{
-			Path: "/users/{id}",
-			Methods: map[string]http.HandlerFunc{
+				http.MethodGet:    ctl.GetByID,
+				http.MethodPut:    ctl.Update,
 				http.MethodDelete: ctl.Delete,
 			},
 		},

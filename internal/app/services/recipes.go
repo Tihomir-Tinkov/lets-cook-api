@@ -13,21 +13,22 @@ import (
 var (
 	ErrInvalidRecipe       = errors.New("invalid recipe")
 	ErrInvalidTitle        = errors.New("title is required")
+	ErrInvalidDescription  = errors.New("description is required")
 	ErrInvalidIngredients  = errors.New("ingredients are required")
 	ErrInvalidInstructions = errors.New("instructions are required")
-	ErrInvalidPrepTime     = errors.New("prep time must be greater than zero")
+	ErrInvalidPrepTime     = errors.New("prep time cannot be negative")
 	ErrInvalidServings     = errors.New("servings must be greater than zero")
 	ErrInvalidDifficulty   = errors.New("difficulty must be between 1 and 10")
-	ErrForbidden           = errors.New("recipe access forbidden")
+	ErrRecipeForbidden     = errors.New("recipe access forbidden")
 )
 
 type RecipeService struct {
-	recipeRepository ports.RecipeRepository
+	repository ports.RecipeRepository
 }
 
-func NewRecipeService(recipeRepository ports.RecipeRepository) *RecipeService {
+func NewRecipeService(repository ports.RecipeRepository) *RecipeService {
 	return &RecipeService{
-		recipeRepository: recipeRepository,
+		repository: repository,
 	}
 }
 
@@ -40,6 +41,10 @@ func validateRecipe(recipe *models.Recipe) error {
 		return ErrInvalidTitle
 	}
 
+	if strings.TrimSpace(recipe.Description) == "" {
+		return ErrInvalidDescription
+	}
+
 	if strings.TrimSpace(recipe.Ingredients) == "" {
 		return ErrInvalidIngredients
 	}
@@ -48,7 +53,7 @@ func validateRecipe(recipe *models.Recipe) error {
 		return ErrInvalidInstructions
 	}
 
-	if recipe.PrepTimeMin <= 0 {
+	if recipe.PrepTimeMin < 0 {
 		return ErrInvalidPrepTime
 	}
 
@@ -68,11 +73,11 @@ func (s *RecipeService) Create(ctx context.Context, recipe *models.Recipe) error
 		return err
 	}
 
-	return s.recipeRepository.Create(ctx, recipe)
+	return s.repository.Create(ctx, recipe)
 }
 
 func (s *RecipeService) GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error) {
-	return s.recipeRepository.GetByID(ctx, id)
+	return s.repository.GetByID(ctx, id)
 }
 
 func (s *RecipeService) List(ctx context.Context, limit, offset int) ([]models.Recipe, error) {
@@ -88,39 +93,39 @@ func (s *RecipeService) List(ctx context.Context, limit, offset int) ([]models.R
 		offset = 0
 	}
 
-	return s.recipeRepository.List(ctx, limit, offset)
+	return s.repository.List(ctx, limit, offset)
 }
 
 func (s *RecipeService) Update(ctx context.Context, userID uuid.UUID, recipe *models.Recipe) error {
-	if recipe.ID == uuid.Nil {
-		return ErrInvalidRecipe
-	}
-
 	if err := validateRecipe(recipe); err != nil {
 		return err
 	}
 
-	existing, err := s.recipeRepository.GetByID(ctx, recipe.ID)
+	if recipe.ID == uuid.Nil {
+		return ErrInvalidRecipe
+	}
+
+	existing, err := s.repository.GetByID(ctx, recipe.ID)
 	if err != nil {
 		return err
 	}
 
 	if existing.AuthorID != userID {
-		return ErrForbidden
+		return ErrRecipeForbidden
 	}
 
-	return s.recipeRepository.Update(ctx, recipe)
+	return s.repository.Update(ctx, recipe)
 }
 
 func (s *RecipeService) Delete(ctx context.Context, userID uuid.UUID, id uuid.UUID) error {
-	recipe, err := s.recipeRepository.GetByID(ctx, id)
+	recipe, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
 
 	if recipe.AuthorID != userID {
-		return ErrForbidden
+		return ErrRecipeForbidden
 	}
 
-	return s.recipeRepository.Delete(ctx, id)
+	return s.repository.Delete(ctx, id)
 }
