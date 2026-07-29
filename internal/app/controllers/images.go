@@ -48,8 +48,7 @@ func (h *ImageController) Upload(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		responses.JSONError(w, r, errors.New("file is required"), http.StatusBadRequest)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		responses.JSONError(w, r, err, http.StatusInternalServerError)
 		return
 	}
 

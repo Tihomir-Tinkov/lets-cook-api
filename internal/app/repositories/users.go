@@ -116,14 +116,12 @@ func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
 			display_name = $2,
 			email = $3,
 			password_hash = $4,
-			role = $5,
 			updated_at = NOW()
 		 WHERE id = $1`,
 		user.ID,
 		user.DisplayName,
 		user.Email,
 		user.PasswordHash,
-		user.Role,
 	)
 
 	if err != nil {

@@ -15,6 +15,6 @@ type Image struct {
 	CreatedAt time.Time `json:"-" db:"created_at"`
 }
 
-func (z Image) Table() string {
+func (Image) Table() string {
 	return "images"
 }

@@ -1,37 +1,223 @@
-GET http://localhost:8082/api/healthcheck
+@baseUrl = http://localhost:8082/api
 
-###
+# 00000000-0000-0000-0000-000000000000
+@userId = 00000000-0000-0000-0000-000000000000
+@recipeId = 00000000-0000-0000-0000-000000000000
+@commentId = 00000000-0000-0000-0000-000000000000
+@imageId = 00000000-0000-0000-0000-000000000000
 
-POST http://localhost:8082/api/images
+################################
+# HEALTHCHECK
+################################
+
+### Health check
+GET {{baseUrl}}/healthcheck
+
+
+################################
+# AUTH
+################################
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "display_name": "Test User",
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+
+### Store JWT from login response
+@token = {{login.response.body.data.token}}
+
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+
+
+################################
+# USERS
+################################
+
+### Get user by ID
+GET {{baseUrl}}/users/{{userId}}
+
+
+### Update user
+PUT {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "display_name": "Updated User",
+  "email": "updated@example.com",
+  "password": "newpassword123"
+}
+
+
+### Delete user
+DELETE {{baseUrl}}/users/{{userId}}
+Authorization: Bearer {{token}}
+
+
+################################
+# RECIPES
+################################
+
+### Get all recipes
+GET {{baseUrl}}/recipes
+
+
+### Create recipe
+# @name createRecipe
+POST {{baseUrl}}/recipes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Spaghetti Carbonara",
+  "description": "Classic Italian pasta dish",
+  "ingredients": "Pasta, eggs, parmesan, pancetta, pepper",
+  "instructions": "Cook pasta. Mix eggs and cheese. Combine everything.",
+  "prep_time_min": 30,
+  "servings": 4,
+  "difficulty": 5
+}
+
+
+### Get recipe by ID
+GET {{baseUrl}}/recipes/{{recipeId}}
+
+
+### Update recipe
+PUT {{baseUrl}}/recipes/{{recipeId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Carbonara",
+  "description": "Updated description",
+  "ingredients": "Updated ingredients",
+  "instructions": "Updated instructions",
+  "prep_time_min": 35,
+  "servings": 5,
+  "difficulty": 6
+}
+
+
+### Delete recipe
+DELETE {{baseUrl}}/recipes/{{recipeId}}
+Authorization: Bearer {{token}}
+
+
+################################
+# COMMENTS
+################################
+
+### Get recipe comments
+GET {{baseUrl}}/recipes/{{recipeId}}/comments
+
+
+### Create comment
+# @name createComment
+POST {{baseUrl}}/recipes/{{recipeId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "body": "This recipe was amazing!",
+  "rating": 9
+}
+
+
+### Get comment
+GET {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
+
+
+### Update comment
+PUT {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "body": "Updated review text",
+  "rating": 10
+}
+
+
+### Delete comment
+DELETE {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
+Authorization: Bearer {{token}}
+
+
+################################
+# IMAGES
+################################
+
+### Upload image 1
+# @name uploadImage1
+POST {{baseUrl}}/images
+Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="Banica.webp"
+Content-Type: image/webp
 
-< ./doc/Banica.webp
+< ./docs/assets/Banica.webp
 --WebAppBoundary--
-###
 
-POST http://localhost:8082/api/images
+
+### Upload image 2
+# @name uploadImage2
+POST {{baseUrl}}/images
+Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="ShopskaSlata.png"
+Content-Type: image/png
 
-< ./doc/ShopskaSlata.png
+< ./docs/assets/ShopskaSlata.png
 --WebAppBoundary--
-###
 
-POST http://localhost:8082/api/images
+
+### Upload image 3
+# @name uploadImage3
+POST {{baseUrl}}/images
+Authorization: Bearer {{token}}
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="Banica.jpg"
+Content-Type: image/jpeg
 
-< ./doc/Banica.jpg
+< ./docs/assets/Banica.jpg
 --WebAppBoundary--
-###
 
-DELETE http://localhost:8082/api/images/<:ID>
 
-###
+### Capture image ID
+# @imageId = {{uploadImage.response.body.data.id}}
+
+
+### Get image
+GET {{baseUrl}}/images/{{imageId}}
+
+
+### Delete image
+DELETE {{baseUrl}}/images/{{imageId}}
+Authorization: Bearer {{token}}

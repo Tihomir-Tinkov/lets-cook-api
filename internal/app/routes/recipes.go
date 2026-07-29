@@ -10,7 +10,7 @@ import (
 func RegisterRecipeRoutes(r *Router, ctl *controllers.RecipeController, authMiddleware *middleware.AuthMiddleware) {
 	recipeRoutes := []Route{
 		{
-			Path: "/recipes/",
+			Path: "/recipes",
 			Methods: map[string]Handler{
 				http.MethodGet: {
 					Func: ctl.List,

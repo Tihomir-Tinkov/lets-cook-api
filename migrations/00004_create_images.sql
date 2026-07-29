@@ -2,13 +2,15 @@
 CREATE TABLE images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    url TEXT NOT NULL,
+    filename TEXT NOT NULL,
 
-    alt_text TEXT,
+    mime_type TEXT NOT NULL,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    extension TEXT NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    size BIGINT NOT NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- +goose Down

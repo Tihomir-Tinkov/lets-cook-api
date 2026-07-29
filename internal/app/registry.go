@@ -15,15 +15,19 @@ type ServiceConstructor func(app *App) interface{}
 type ControllerConstructor func(app *App)
 
 type TypedRepositories struct {
-	UserRepository  *repositories.UserRepository
-	ImageRepository *repositories.ImageRepository
-	FileStorage     *repositories.LocalStorage
+	UserRepository    *repositories.UserRepository
+	RecipeRepository  *repositories.RecipeRepository
+	CommentRepository *repositories.CommentRepository
+	ImageRepository   *repositories.ImageRepository
+	FileStorage       *repositories.LocalStorage
 }
 
 type TypedServices struct {
-	Healthcheck  *services.HealthCheckService
-	UserService  *services.UserService
-	ImageService *services.ImageService
+	Healthcheck    *services.HealthCheckService
+	UserService    *services.UserService
+	RecipeService  *services.RecipeService
+	CommentService *services.CommentService
+	ImageService   *services.ImageService
 }
 
 type TypedAdapters struct {

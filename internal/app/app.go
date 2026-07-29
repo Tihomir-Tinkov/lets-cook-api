@@ -89,23 +89,35 @@ var controllerConstructors = map[string]ControllerConstructor{
 		routes.RegisterServiceRoutes(app.Router, ctl)
 	},
 
-	"images": func(app *App) {
-		ctl := controllers.NewImageController(app.TypedServices.ImageService)
-		routes.RegisterImagesRoutes(app.Router, ctl, app.AuthMiddleware)
-	},
-
 	"user": func(app *App) {
 		ctl := controllers.NewUserController(app.TypedServices.UserService)
 		routes.RegisterUserRoutes(app.Router, ctl, app.AuthMiddleware)
+	},
+
+	"recipe": func(app *App) {
+		ctl := controllers.NewRecipeController(app.TypedServices.RecipeService)
+		routes.RegisterRecipeRoutes(app.Router, ctl, app.AuthMiddleware)
+	},
+
+	"comment": func(app *App) {
+		ctl := controllers.NewCommentController(app.TypedServices.CommentService)
+		routes.RegisterCommentRoutes(app.Router, ctl, app.AuthMiddleware)
+	},
+
+	"images": func(app *App) {
+		ctl := controllers.NewImageController(app.TypedServices.ImageService)
+		routes.RegisterImagesRoutes(app.Router, ctl, app.AuthMiddleware)
 	},
 }
 
 func (a *App) bootstrap() error {
 	// Instantiate typed repositories directly
 	a.TypedRepos = &TypedRepositories{
-		UserRepository:  repositories.NewUserRepository(a.DB),
-		ImageRepository: repositories.NewImageRepository(a.DB),
-		FileStorage:     repositories.NewLocalStorage(a.Config.StorePath),
+		UserRepository:    repositories.NewUserRepository(a.DB),
+		RecipeRepository:  repositories.NewRecipeRepository(a.DB),
+		CommentRepository: repositories.NewCommentRepository(a.DB),
+		ImageRepository:   repositories.NewImageRepository(a.DB),
+		FileStorage:       repositories.NewLocalStorage(a.Config.StorePath),
 	}
 
 	healthProbe := gateways.NewHealth(a.DB)
@@ -130,9 +142,11 @@ func (a *App) bootstrap() error {
 	a.AuthMiddleware = middleware.NewAuthMiddleware(a.TypedAdapters.TokenProvider)
 
 	a.TypedServices = &TypedServices{
-		Healthcheck:  services.NewHealthCheckService(healthProbe),
-		ImageService: services.NewImageService(a.TypedRepos.ImageRepository, a.TypedRepos.FileStorage),
-		UserService:  services.NewUserService(a.TypedRepos.UserRepository, a.TypedAdapters.PasswordHasher, a.TypedAdapters.TokenProvider),
+		Healthcheck:    services.NewHealthCheckService(healthProbe),
+		UserService:    services.NewUserService(a.TypedRepos.UserRepository, a.TypedAdapters.PasswordHasher, a.TypedAdapters.TokenProvider),
+		RecipeService:  services.NewRecipeService(a.TypedRepos.RecipeRepository),
+		CommentService: services.NewCommentService(a.TypedRepos.CommentRepository),
+		ImageService:   services.NewImageService(a.TypedRepos.ImageRepository, a.TypedRepos.FileStorage),
 	}
 
 	for _, constructor := range controllerConstructors {
