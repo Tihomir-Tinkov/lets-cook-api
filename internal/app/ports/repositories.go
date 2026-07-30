@@ -17,10 +17,10 @@ type UserRepository interface {
 }
 
 type RecipeRepository interface {
-	Create(ctx context.Context, recipe *models.Recipe) error
+	Create(ctx context.Context, recipe *models.Recipe, images []models.RecipeImage) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error)
 	List(ctx context.Context, limit, offset int) ([]models.Recipe, error)
-	Update(ctx context.Context, recipe *models.Recipe) error
+	Update(ctx context.Context, recipe *models.Recipe, images []models.RecipeImage) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -34,7 +34,7 @@ type CommentRepository interface {
 
 type ImageRepository interface {
 	Create(ctx context.Context, image *models.Image) error
-	Get(ctx context.Context, id uuid.UUID) (*models.Image, error)
+	GetByID(ctx context.Context, id uuid.UUID) (*models.Image, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 

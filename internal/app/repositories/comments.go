@@ -33,6 +33,27 @@ func (r *CommentRepository) Type() reflect.Type {
 	return reflect.TypeOf(models.Comment{})
 }
 
+// updated_at = NOW() ?
+func updateRecipeStats(ctx context.Context, recipeID uuid.UUID, tx pgx.Tx) error {
+	_, err := tx.Exec(ctx,
+		`UPDATE recipes r
+		 SET
+			rating_count = s.rating_count,
+			rating_avg   = s.rating_avg
+		 FROM (
+			SELECT
+				COUNT(*)::integer AS rating_count,
+				COALESCE(AVG(rating), 0)::numeric(3,1) AS rating_avg
+			FROM comments
+			WHERE recipe_id = $1
+		 ) s
+		 WHERE r.id = $1`,
+		recipeID,
+	)
+
+	return err
+}
+
 func (r *CommentRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.Comment, error) {
 	rows, err := r.db.Query(
 		ctx,
@@ -105,7 +126,13 @@ func (r *CommentRepository) GetByRecipeID(ctx context.Context, recipeID uuid.UUI
 }
 
 func (r *CommentRepository) Create(ctx context.Context, comment *models.Comment) error {
-	err := r.db.QueryRow(ctx,
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(ctx,
 		`INSERT INTO comments (
 			recipe_id,
 			author_id,
@@ -122,11 +149,26 @@ func (r *CommentRepository) Create(ctx context.Context, comment *models.Comment)
 		&comment.CreatedAt,
 		&comment.UpdatedAt,
 	)
-	return err
+
+	if err != nil {
+		return err
+	}
+
+	if err := updateRecipeStats(ctx, comment.RecipeID, tx); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }
 
 func (r *CommentRepository) Update(ctx context.Context, comment *models.Comment) error {
-	err := r.db.QueryRow(
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	err = tx.QueryRow(
 		ctx,
 		`UPDATE comments
 		 SET
@@ -134,11 +176,11 @@ func (r *CommentRepository) Update(ctx context.Context, comment *models.Comment)
 			rating = $3,
 			updated_at = NOW()
 		 WHERE id = $1
-		 RETURNING updated_at`,
+		 RETURNING recipe_id, updated_at`,
 		comment.ID,
 		comment.Body,
 		comment.Rating,
-	).Scan(&comment.UpdatedAt)
+	).Scan(&comment.RecipeID, &comment.UpdatedAt)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -148,24 +190,38 @@ func (r *CommentRepository) Update(ctx context.Context, comment *models.Comment)
 		return err
 	}
 
-	return nil
-}
-
-func (r *CommentRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	result, err := r.db.Exec(
-		ctx,
-		`DELETE FROM comments
-		 WHERE id = $1`,
-		id,
-	)
-
-	if err != nil {
+	if err := updateRecipeStats(ctx, comment.RecipeID, tx); err != nil {
 		return err
 	}
 
-	if result.RowsAffected() == 0 {
-		return ErrCommentNotFound
+	return tx.Commit(ctx)
+}
+
+func (r *CommentRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var recipeID uuid.UUID
+	err = tx.QueryRow(ctx,
+		`DELETE FROM comments
+		 WHERE id = $1
+		 RETURNING recipe_id`,
+		id,
+	).Scan(&recipeID)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrCommentNotFound
+		}
+		return err
 	}
 
-	return nil
+	if err := updateRecipeStats(ctx, recipeID, tx); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }

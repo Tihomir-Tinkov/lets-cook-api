@@ -82,7 +82,7 @@ Authorization: Bearer {{token}}
 GET {{baseUrl}}/recipes
 
 
-### Create recipe
+### Create recipe with images
 # @name createRecipe
 POST {{baseUrl}}/recipes
 Authorization: Bearer {{token}}
@@ -95,15 +95,29 @@ Content-Type: application/json
   "instructions": "Cook pasta. Mix eggs and cheese. Combine everything.",
   "prep_time_min": 30,
   "servings": 4,
-  "difficulty": 5
+  "difficulty": 5,
+  "images": [
+    {
+      "image_id": "{{imageId1}}",
+      "display_order": 0
+    },
+    {
+      "image_id": "{{imageId2}}",
+      "display_order": 1
+    }
+  ]
 }
 
 
-### Get recipe by ID
+### Capture recipe ID
+@recipeId = {{createRecipe.response.body.data.id}}
+
+
+### Get recipe by ID (should include images)
 GET {{baseUrl}}/recipes/{{recipeId}}
 
 
-### Update recipe
+### Update recipe and reorder images
 PUT {{baseUrl}}/recipes/{{recipeId}}
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -115,7 +129,21 @@ Content-Type: application/json
   "instructions": "Updated instructions",
   "prep_time_min": 35,
   "servings": 5,
-  "difficulty": 6
+  "difficulty": 6,
+  "images": [
+    {
+      "image_id": "{{imageId2}}",
+      "display_order": 0
+    },
+    {
+      "image_id": "{{imageId1}}",
+      "display_order": 1
+    },
+    {
+      "image_id": "{{imageId3}}",
+      "display_order": 2
+    }
+  ]
 }
 
 
@@ -182,6 +210,10 @@ Content-Type: image/webp
 --WebAppBoundary--
 
 
+### Capture image ID 1
+@imageId1 = {{uploadImage1.response.body.data}}
+
+
 ### Upload image 2
 # @name uploadImage2
 POST {{baseUrl}}/images
@@ -194,6 +226,10 @@ Content-Type: image/png
 
 < ./docs/assets/ShopskaSlata.png
 --WebAppBoundary--
+
+
+### Capture image ID 2
+@imageId2 = {{uploadImage2.response.body.data}}
 
 
 ### Upload image 3
@@ -210,14 +246,14 @@ Content-Type: image/jpeg
 --WebAppBoundary--
 
 
-### Capture image ID
-# @imageId = {{uploadImage.response.body.data.id}}
+### Capture image ID 3
+@imageId3 = {{uploadImage3.response.body.data}}
 
 
-### Get image
-GET {{baseUrl}}/images/{{imageId}}
+### Get image 1
+GET {{baseUrl}}/images/{{imageId1}}
 
 
-### Delete image
-DELETE {{baseUrl}}/images/{{imageId}}
+### Try deleting attached image
+DELETE {{baseUrl}}/images/{{imageId1}}
 Authorization: Bearer {{token}}

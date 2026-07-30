@@ -8,6 +8,7 @@ import (
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/responses"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
+	"github.com/google/uuid"
 )
 
 var ErrInvalidRecipeID = errors.New("invalid recipe id")
@@ -22,24 +23,31 @@ func NewRecipeController(recipeService *services.RecipeService) *RecipeControlle
 	}
 }
 
+type recipeImageRequest struct {
+	ImageID      uuid.UUID `json:"image_id"`
+	DisplayOrder int       `json:"display_order"`
+}
+
 type createRecipeRequest struct {
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	Ingredients  string `json:"ingredients"`
-	Instructions string `json:"instructions"`
-	PrepTimeMin  int    `json:"prep_time_min"`
-	Servings     int    `json:"servings"`
-	Difficulty   int    `json:"difficulty"`
+	Title        string               `json:"title"`
+	Description  string               `json:"description"`
+	Ingredients  string               `json:"ingredients"`
+	Instructions string               `json:"instructions"`
+	PrepTimeMin  int                  `json:"prep_time_min"`
+	Servings     int                  `json:"servings"`
+	Difficulty   int                  `json:"difficulty"`
+	Images       []recipeImageRequest `json:"images"`
 }
 
 type updateRecipeRequest struct {
-	Title        string `json:"title"`
-	Description  string `json:"description"`
-	Ingredients  string `json:"ingredients"`
-	Instructions string `json:"instructions"`
-	PrepTimeMin  int    `json:"prep_time_min"`
-	Servings     int    `json:"servings"`
-	Difficulty   int    `json:"difficulty"`
+	Title        string               `json:"title"`
+	Description  string               `json:"description"`
+	Ingredients  string               `json:"ingredients"`
+	Instructions string               `json:"instructions"`
+	PrepTimeMin  int                  `json:"prep_time_min"`
+	Servings     int                  `json:"servings"`
+	Difficulty   int                  `json:"difficulty"`
+	Images       []recipeImageRequest `json:"images"`
 }
 
 func (c *RecipeController) Create(w http.ResponseWriter, r *http.Request) {
@@ -65,6 +73,13 @@ func (c *RecipeController) Create(w http.ResponseWriter, r *http.Request) {
 		PrepTimeMin:  req.PrepTimeMin,
 		Servings:     req.Servings,
 		Difficulty:   req.Difficulty,
+	}
+
+	for _, img := range req.Images {
+		recipe.Images = append(recipe.Images, models.RecipeImage{
+			ImageID:      img.ImageID,
+			DisplayOrder: img.DisplayOrder,
+		})
 	}
 
 	if err := c.recipeService.Create(
@@ -145,6 +160,13 @@ func (c *RecipeController) Update(w http.ResponseWriter, r *http.Request) {
 		PrepTimeMin:  req.PrepTimeMin,
 		Servings:     req.Servings,
 		Difficulty:   req.Difficulty,
+	}
+
+	for _, img := range req.Images {
+		recipe.Images = append(recipe.Images, models.RecipeImage{
+			ImageID:      img.ImageID,
+			DisplayOrder: img.DisplayOrder,
+		})
 	}
 
 	if err := c.recipeService.Update(

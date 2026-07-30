@@ -20,6 +20,8 @@ type Recipe struct {
 	RatingCount  int       `json:"ratingCount" db:"rating_count"`
 	CreatedAt    time.Time `json:"-" db:"created_at"`
 	UpdatedAt    time.Time `json:"-" db:"updated_at"`
+
+	Images []RecipeImage `json:"images"`
 }
 
 func (Recipe) Table() string {

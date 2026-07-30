@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
 	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/ports"
@@ -59,42 +58,32 @@ func (s *ImageService) Upload(
 		return uuid.Nil, err
 	}
 
-	id := uuid.New()
-
-	err = s.storage.Save(
-		ctx,
-		id,
-		detectedFile.Extension,
-		detectedFile.Reader,
-	)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
 	image := &models.Image{
-		ID:        id,
 		FileName:  req.Filename,
 		MimeType:  detectedFile.MimeType,
 		Extension: detectedFile.Extension,
 		Size:      req.Size,
-		CreatedAt: time.Now().UTC(),
 	}
 
 	err = s.repository.Create(ctx, image)
 	if err != nil {
+		return uuid.Nil, err
+	}
 
-		// rollback on file system
-
-		_ = s.storage.Delete(
-			ctx,
-			id,
-			detectedFile.Extension,
-		)
+	err = s.storage.Save(
+		ctx,
+		image.ID,
+		detectedFile.Extension,
+		detectedFile.Reader,
+	)
+	if err != nil {
+		// cleanup DB row because storage failed
+		_ = s.repository.Delete(ctx, image.ID)
 
 		return uuid.Nil, err
 	}
 
-	return id, nil
+	return image.ID, nil
 }
 
 func (s *ImageService) Download(
@@ -102,7 +91,7 @@ func (s *ImageService) Download(
 	id uuid.UUID,
 ) (*models.Image, io.ReadCloser, error) {
 
-	image, err := s.repository.Get(ctx, id)
+	image, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -124,7 +113,7 @@ func (s *ImageService) Delete(
 	id uuid.UUID,
 ) error {
 
-	image, err := s.repository.Get(ctx, id)
+	image, err := s.repository.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}

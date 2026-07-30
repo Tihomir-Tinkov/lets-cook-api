@@ -73,7 +73,11 @@ func (s *RecipeService) Create(ctx context.Context, recipe *models.Recipe) error
 		return err
 	}
 
-	return s.repository.Create(ctx, recipe)
+	if len(recipe.Images) == 0 {
+		return ErrInvalidRecipe
+	}
+
+	return s.repository.Create(ctx, recipe, recipe.Images)
 }
 
 func (s *RecipeService) GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error) {
@@ -105,6 +109,10 @@ func (s *RecipeService) Update(ctx context.Context, userID uuid.UUID, recipe *mo
 		return ErrInvalidRecipe
 	}
 
+	if len(recipe.Images) == 0 {
+		return ErrInvalidRecipe
+	}
+
 	existing, err := s.repository.GetByID(ctx, recipe.ID)
 	if err != nil {
 		return err
@@ -114,7 +122,7 @@ func (s *RecipeService) Update(ctx context.Context, userID uuid.UUID, recipe *mo
 		return ErrRecipeForbidden
 	}
 
-	return s.repository.Update(ctx, recipe)
+	return s.repository.Update(ctx, recipe, recipe.Images)
 }
 
 func (s *RecipeService) Delete(ctx context.Context, userID uuid.UUID, id uuid.UUID) error {

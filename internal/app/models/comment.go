@@ -11,7 +11,7 @@ type Comment struct {
 	RecipeID  uuid.UUID `json:"recipeId" db:"recipe_id"`
 	AuthorID  uuid.UUID `json:"authorId" db:"author_id"`
 	Body      string    `json:"body" db:"body"`
-	Rating    int       `json:"rating"`
+	Rating    int       `json:"rating" db:"rating"`
 	CreatedAt time.Time `json:"-" db:"created_at"`
 	UpdatedAt time.Time `json:"-" db:"updated_at"`
 }
