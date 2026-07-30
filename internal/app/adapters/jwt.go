@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )

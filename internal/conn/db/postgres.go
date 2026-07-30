@@ -6,7 +6,7 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/config"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )

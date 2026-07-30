@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/config"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/config"
 )
 
 func CorsMiddleware(next http.Handler, corsConfig config.CorsConfig) http.HandlerFunc {

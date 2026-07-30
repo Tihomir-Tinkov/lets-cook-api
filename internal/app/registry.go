@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/adapters"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/adapters"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/repositories"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/services"
 )
 
 type RepositoryConstructor struct {

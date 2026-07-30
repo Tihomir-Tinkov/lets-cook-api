@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/config"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

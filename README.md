@@ -1,7 +1,7 @@
-# Cooking Site Project
+# Let's Cook API
 
-![Go](...)
-![License](...)
+[![Go](https://img.shields.io/badge/Go-1.22%2B-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![License](https://img.shields.io/github/license/Tihomir-Tinkov/lets-cook-api)](LICENSE)
 
 REST API powering a cooking recipe platform. Supports user authentication, recipe management, comments, and user ratings.
 
@@ -42,9 +42,9 @@ REST API powering a cooking recipe platform. Supports user authentication, recip
 ### Clone the repository
 
 ```bash
-git clone https://github.com/Tihomir-Tinkov/cooking-site-project.git
+git clone https://github.com/Tihomir-Tinkov/lets-cook-api.git
 
-cd cooking-site-project
+cd lets-cook-api
 ```
 
 ### Install dependencies
@@ -80,7 +80,7 @@ http://localhost:8080
 OpenAPI specification:
 
 - `/docs/openapi.yaml`
-- Interactive Swagger UI: https://Tihomir-Tinkov.github.io/cooking-site-project
+- Interactive Swagger UI: https://tihomir-tinkov.github.io/lets-cook-api/
 
 ---
 
@@ -99,7 +99,7 @@ Authorization: Bearer <your_token>
 ## Project Structure
 
 ```text
-cooking-site-project/
+lets-cook-api/
 ├── cmd/
 │   └── server/
 │       └── main.go
@@ -193,7 +193,21 @@ For local development, values can be provided through a `.env` file.
 Run migrations:
 
 ```bash
-goose -dir migrations postgres <connection_string> up
+# Apply all pending migrations
+goose -dir migrations postgres <CONNECTION_STRING> up
+
+# Apply the next migration
+goose -dir migrations postgres <CONNECTION_STRING> up-by-one
+```
+
+Rollback:
+
+```bash
+# Roll back the last applied migration
+goose -dir migrations postgres <CONNECTION_STRING> down
+
+# Roll back all migrations
+goose -dir migrations postgres <CONNECTION_STRING> down-to 0
 ```
 
 ---
@@ -222,4 +236,4 @@ The application outputs structured logs with request information, errors, and st
 
 ## License
 
-This project is licensed under ...
+This project is licensed under the GNU Affero General Public License v3.0. See the [LICENSE](LICENSE) file for details.

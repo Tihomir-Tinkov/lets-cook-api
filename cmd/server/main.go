@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/config"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/logger"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/config"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/logger"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 
-	appbuilder "github.com/Tihomir-Tinkov/cooking-site-project/internal/app"
+	appbuilder "github.com/Tihomir-Tinkov/lets-cook-api/internal/app"
 )
 
 func main() {

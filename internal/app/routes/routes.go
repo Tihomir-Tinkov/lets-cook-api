@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/responses"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/middleware"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/responses"
 	"github.com/rs/zerolog/log"
 )
 

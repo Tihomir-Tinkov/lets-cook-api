@@ -1,4 +1,4 @@
-module github.com/Tihomir-Tinkov/cooking-site-project
+module github.com/Tihomir-Tinkov/lets-cook-api
 
 go 1.25.0
 

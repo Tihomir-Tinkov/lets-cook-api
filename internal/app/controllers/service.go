@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/responses"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/responses"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/services"
 )
 
 type HealthController struct {

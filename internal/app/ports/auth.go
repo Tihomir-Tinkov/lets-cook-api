@@ -1,7 +1,7 @@
 package ports
 
 import (
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
 	"github.com/google/uuid"
 )
 

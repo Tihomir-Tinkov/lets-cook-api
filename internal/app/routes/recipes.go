@@ -3,8 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/middleware"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/middleware"
 )
 
 func RegisterRecipeRoutes(r *Router, ctl *controllers.RecipeController, authMiddleware *middleware.AuthMiddleware) {

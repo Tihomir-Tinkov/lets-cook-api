@@ -5,7 +5,7 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

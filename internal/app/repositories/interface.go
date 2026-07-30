@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/ports"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/ports"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

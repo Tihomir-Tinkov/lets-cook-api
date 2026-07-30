@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/controllers/responses"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/services"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/responses"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/services"
 )
 
 var (

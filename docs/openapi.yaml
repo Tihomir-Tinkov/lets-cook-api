@@ -1,8 +1,8 @@
 openapi: 3.2.0
 info:
-  title: Cookbook
+  title: Let's Cook API
   description: |
-    This is a sample Cooking Website Server based on the OpenAPI 3.2 specification.
+    REST API powering a cooking recipe platform. Supports user authentication, recipe management, comments, and user ratings.
   version: 1.0.0
 tags:
   - name: Recipes

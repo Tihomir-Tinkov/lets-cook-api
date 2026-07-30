@@ -5,9 +5,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/models"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/ports"
-	"github.com/Tihomir-Tinkov/cooking-site-project/internal/app/repositories"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/ports"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/repositories"
 	"github.com/google/uuid"
 )
 
