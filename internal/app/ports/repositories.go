@@ -17,10 +17,10 @@ type UserRepository interface {
 }
 
 type RecipeRepository interface {
-	Create(ctx context.Context, recipe *models.Recipe, images []models.RecipeImage) error
+	Create(ctx context.Context, recipe *models.Recipe) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error)
 	List(ctx context.Context, limit, offset int) ([]models.Recipe, error)
-	Update(ctx context.Context, recipe *models.Recipe, images []models.RecipeImage) error
+	Update(ctx context.Context, recipe *models.Recipe) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 

@@ -47,6 +47,8 @@ Schema -> Migration -> Model -> Port -> Repository -> Service -> Controller -> R
 
 ## 7.Frontend
 
+https://openapi-ts.dev/introduction
+
 - TypeScript
 - Svelte/Kit
   - https://flowbite-svelte.com/
@@ -66,3 +68,26 @@ Schema -> Migration -> Model -> Port -> Repository -> Service -> Controller -> R
   - https://daisyui.com/
   - https://lucide.dev/icons/
 - Tailwind CSS
+
+
+At this point you have:
+
+✅ SvelteKit
+✅ TypeScript
+✅ Tailwind CSS v4
+✅ shadcn-svelte
+✅ Luma design preset
+✅ OpenAPI-generated types
+
+That's a solid modern frontend stack.
+
+Next things I'd do:
+
+Add a RecipeGrid.svelte component and move the {#each} there.
+Add a homepage structure:
+hero/title
+search bar
+recipe grid
+Replace the emoji metadata with Lucide icons and shadcn Badge.
+
+But first, let's get the current cards rendering. Let me know if the three cards appear.

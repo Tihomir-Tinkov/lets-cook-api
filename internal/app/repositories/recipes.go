@@ -33,7 +33,7 @@ func (r *RecipeRepository) Type() reflect.Type {
 	return reflect.TypeOf(models.Recipe{})
 }
 
-func (r *RecipeRepository) Create(ctx context.Context, recipe *models.Recipe, images []models.RecipeImage) error {
+func (r *RecipeRepository) Create(ctx context.Context, recipe *models.Recipe) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -73,11 +73,11 @@ func (r *RecipeRepository) Create(ctx context.Context, recipe *models.Recipe, im
 		return err
 	}
 
-	for i := range images {
-		images[i].RecipeID = recipe.ID
+	for i := range recipe.Images {
+		recipe.Images[i].RecipeID = recipe.ID
 	}
 
-	for _, img := range images {
+	for _, img := range recipe.Images {
 		_, err = tx.Exec(
 			ctx,
 			`INSERT INTO recipe_images (
@@ -172,45 +172,95 @@ func (r *RecipeRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.R
 func (r *RecipeRepository) List(ctx context.Context, limit, offset int) ([]models.Recipe, error) {
 	rows, err := r.db.Query(
 		ctx,
-		`SELECT
-			id,
-			author_id,
-			title,
-			description,
-			ingredients,
-			instructions,
-			prep_time_min,
-			servings,
-			difficulty,
-			rating_avg,
-			rating_count,
-			created_at,
-			updated_at
-		 FROM recipes
-		 ORDER BY created_at DESC
-		 LIMIT $1 OFFSET $2`,
+		`
+		SELECT
+			r.id,
+			r.author_id,
+			r.title,
+			r.description,
+			r.ingredients,
+			r.instructions,
+			r.prep_time_min,
+			r.servings,
+			r.difficulty,
+			r.rating_avg,
+			r.rating_count,
+			r.created_at,
+			r.updated_at,
+
+			img.image_id,
+			img.display_order
+
+		FROM recipes r
+
+		LEFT JOIN LATERAL (
+			SELECT image_id, display_order
+			FROM recipe_images
+			WHERE recipe_id = r.id
+			ORDER BY display_order
+			LIMIT 1
+		) img ON TRUE
+
+		ORDER BY r.created_at DESC
+		LIMIT $1 OFFSET $2;
+		`,
 		limit,
 		offset,
 	)
-
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	recipes, err := pgx.CollectRows(
-		rows,
-		pgx.RowToStructByName[models.Recipe],
-	)
+	var recipes []models.Recipe
 
-	if err != nil {
+	for rows.Next() {
+		var recipe models.Recipe
+		var imageID *uuid.UUID
+		var displayOrder *int
+
+		err := rows.Scan(
+			&recipe.ID,
+			&recipe.AuthorID,
+			&recipe.Title,
+			&recipe.Description,
+			&recipe.Ingredients,
+			&recipe.Instructions,
+			&recipe.PrepTimeMin,
+			&recipe.Servings,
+			&recipe.Difficulty,
+			&recipe.RatingAvg,
+			&recipe.RatingCount,
+			&recipe.CreatedAt,
+			&recipe.UpdatedAt,
+			&imageID,
+			&displayOrder,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if imageID != nil {
+			recipe.Images = []models.RecipeImage{
+				{
+					RecipeID:     recipe.ID,
+					ImageID:      *imageID,
+					DisplayOrder: *displayOrder,
+				},
+			}
+		}
+
+		recipes = append(recipes, recipe)
+	}
+
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
 	return recipes, nil
 }
 
-func (r *RecipeRepository) Update(ctx context.Context, recipe *models.Recipe, images []models.RecipeImage) error {
+func (r *RecipeRepository) Update(ctx context.Context, recipe *models.Recipe) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -249,13 +299,6 @@ func (r *RecipeRepository) Update(ctx context.Context, recipe *models.Recipe, im
 		return err
 	}
 
-	// Delete images not present anymore
-	imageIDs := make([]uuid.UUID, len(images))
-
-	for i, img := range images {
-		imageIDs[i] = img.ImageID
-	}
-
 	_, err = tx.Exec(ctx,
 		`DELETE FROM recipe_images
       	WHERE recipe_id=$1`,
@@ -265,7 +308,7 @@ func (r *RecipeRepository) Update(ctx context.Context, recipe *models.Recipe, im
 		return err
 	}
 
-	for _, img := range images {
+	for _, img := range recipe.Images {
 		_, err = tx.Exec(ctx,
 			`INSERT INTO recipe_images
 				(recipe_id,image_id,display_order)
