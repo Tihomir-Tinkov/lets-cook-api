@@ -23,7 +23,7 @@ POST {{baseUrl}}/auth/register
 Content-Type: application/json
 
 {
-  "display_name": "Test User",
+  "displayName": "Test User",
   "email": "test@example.com",
   "password": "password123"
 }
@@ -63,7 +63,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "display_name": "Updated User",
+  "displayName": "Updated User",
   "email": "updated@example.com",
   "password": "newpassword123"
 }
@@ -93,17 +93,17 @@ Content-Type: application/json
   "description": "Classic Italian pasta dish",
   "ingredients": "Pasta, eggs, parmesan, pancetta, pepper",
   "instructions": "Cook pasta. Mix eggs and cheese. Combine everything.",
-  "prep_time_min": 30,
+  "prepTimeMin": 30,
   "servings": 4,
   "difficulty": 5,
   "images": [
     {
-      "image_id": "{{imageId1}}",
-      "display_order": 0
+      "imageId": "{{imageId1}}",
+      "displayOrder": 0
     },
     {
-      "image_id": "{{imageId2}}",
-      "display_order": 1
+      "imageId": "{{imageId2}}",
+      "displayOrder": 1
     }
   ]
 }
@@ -127,21 +127,21 @@ Content-Type: application/json
   "description": "Updated description",
   "ingredients": "Updated ingredients",
   "instructions": "Updated instructions",
-  "prep_time_min": 35,
+  "prepTimeMin": 35,
   "servings": 5,
   "difficulty": 6,
   "images": [
     {
-      "image_id": "{{imageId2}}",
-      "display_order": 0
+      "imageId": "{{imageId2}}",
+      "displayOrder": 0
     },
     {
-      "image_id": "{{imageId1}}",
-      "display_order": 1
+      "imageId": "{{imageId1}}",
+      "displayOrder": 1
     },
     {
-      "image_id": "{{imageId3}}",
-      "display_order": 2
+      "imageId": "{{imageId3}}",
+      "displayOrder": 2
     }
   ]
 }

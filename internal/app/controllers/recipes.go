@@ -24,8 +24,8 @@ func NewRecipeController(recipeService *services.RecipeService) *RecipeControlle
 }
 
 type recipeImageRequest struct {
-	ImageID      uuid.UUID `json:"image_id"`
-	DisplayOrder int       `json:"display_order"`
+	ImageID      uuid.UUID `json:"imageId"`
+	DisplayOrder int       `json:"displayOrder"`
 }
 
 type createRecipeRequest struct {
@@ -33,7 +33,7 @@ type createRecipeRequest struct {
 	Description  string               `json:"description"`
 	Ingredients  string               `json:"ingredients"`
 	Instructions string               `json:"instructions"`
-	PrepTimeMin  int                  `json:"prep_time_min"`
+	PrepTimeMin  int                  `json:"prepTimeMin"`
 	Servings     int                  `json:"servings"`
 	Difficulty   int                  `json:"difficulty"`
 	Images       []recipeImageRequest `json:"images"`
@@ -44,7 +44,7 @@ type updateRecipeRequest struct {
 	Description  string               `json:"description"`
 	Ingredients  string               `json:"ingredients"`
 	Instructions string               `json:"instructions"`
-	PrepTimeMin  int                  `json:"prep_time_min"`
+	PrepTimeMin  int                  `json:"prepTimeMin"`
 	Servings     int                  `json:"servings"`
 	Difficulty   int                  `json:"difficulty"`
 	Images       []recipeImageRequest `json:"images"`

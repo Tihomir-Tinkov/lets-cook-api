@@ -104,8 +104,7 @@ lets-cook-api/
 │   └── server/
 │       └── main.go
 ├── docs/
-│   ├── assets/
-│   └── swagger-ui/
+│   └── assets/
 ├── internal/
 │   ├── app/
 │   │   ├── adapters/
@@ -128,6 +127,7 @@ lets-cook-api/
 ├── migrations/
 ├── .env.example
 ├── .gitignore
+├── LICENSE
 ├── README.md
 ├── api.http
 ├── go.mod

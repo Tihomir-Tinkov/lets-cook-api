@@ -24,7 +24,7 @@ func NewUserController(userService *services.UserService) *UserController {
 }
 
 type registerRequest struct {
-	DisplayName string `json:"display_name"`
+	DisplayName string `json:"displayName"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`
 }
@@ -35,7 +35,7 @@ type loginRequest struct {
 }
 
 type updateUserRequest struct {
-	DisplayName string `json:"display_name"`
+	DisplayName string `json:"displayName"`
 	Email       string `json:"email"`
 	Password    string `json:"password"`
 }
