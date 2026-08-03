@@ -777,6 +777,12 @@ components:
 
     Comment:
       type: object
+      required:
+        - id
+        - recipeId
+        - authorId
+        - body
+        - rating
       properties:
         id:
           type: string
