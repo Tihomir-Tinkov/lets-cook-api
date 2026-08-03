@@ -18,21 +18,19 @@ func CorsMiddleware(next http.Handler, corsConfig config.CorsConfig) http.Handle
 		"X-User-Id",
 	}
 
-	allowedMethods := "GET, POST, PUT, DELETE, OPTIONS"
+	allowedMethods := "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		origin := r.Header.Get("Origin")
-		if corsConfig.AllowOrigins == "*" {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-		} else if origin != "" {
-			allowedOrigins := strings.Split(corsConfig.AllowOrigins, ",")
-			for _, allowed := range allowedOrigins {
-				if strings.TrimSpace(allowed) == origin {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-					w.Header().Add("Vary", "Origin")
-					break
-				}
+
+		allowedOrigins := strings.Split(corsConfig.AllowOrigins, ",")
+
+		for _, allowed := range allowedOrigins {
+			if strings.TrimSpace(allowed) == origin {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Add("Vary", "Origin")
+				break
 			}
 		}
 

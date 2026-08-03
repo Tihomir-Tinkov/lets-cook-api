@@ -62,8 +62,11 @@ func NewApp(cfg config.Config) (*App, error) {
 	addr := netip.AddrPortFrom(netip.IPv4Unspecified(), cfg.Server.InternalPort)
 
 	app.Server = &http.Server{
-		Addr:              addr.String(),
-		Handler:           app.Router.Mux(),
+		Addr: addr.String(),
+		Handler: middleware.CorsMiddleware(
+			app.Router.Mux(),
+			cfg.Server.Cors,
+		),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       60 * time.Second,
 		WriteTimeout:      30 * time.Second,
