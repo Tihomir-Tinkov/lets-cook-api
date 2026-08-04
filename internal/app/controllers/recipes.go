@@ -28,6 +28,26 @@ type recipeImageRequest struct {
 	DisplayOrder int       `json:"displayOrder"`
 }
 
+type recipeImageResponse struct {
+	ImageID      uuid.UUID `json:"imageId"`
+	URL          string    `json:"url"`
+	DisplayOrder int       `json:"displayOrder"`
+}
+
+/*
+type URLBuilder struct {
+	BaseURL string
+}
+
+func (b URLBuilder) URL(id uuid.UUID) string {
+	return fmt.Sprintf("%s/images/%s", b.BaseURL, id)
+}
+
+imageURLs := images.URLBuilder{
+	BaseURL: config.PublicURL,
+}
+*/
+
 type createRecipeRequest struct {
 	Title        string               `json:"title"`
 	Description  string               `json:"description"`

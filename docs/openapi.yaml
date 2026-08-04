@@ -806,6 +806,9 @@ components:
         imageId:
           type: string
           format: uuid
+        url:
+          type: string
+          format: uri
         displayOrder:
           type: integer
           format: int32
