@@ -996,8 +996,9 @@ components:
           enum:
             - success
         data:
-          type: object
-          nullable: true
+          type:
+            - object
+            - "null"
           description: Response payload
 
     ErrorResponse:
