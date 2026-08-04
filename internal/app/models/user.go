@@ -21,7 +21,7 @@ type AuthContext struct {
 type User struct {
 	ID           uuid.UUID `json:"id" db:"id"`
 	DisplayName  string    `json:"displayName" db:"display_name"`
-	Email        string    `json:"-" db:"email"`
+	Email        string    `json:"email" db:"email"`
 	PasswordHash string    `json:"-" db:"password_hash"`
 	Role         UserRole  `json:"role" db:"role"`
 	CreatedAt    time.Time `json:"-" db:"created_at"`

@@ -33,9 +33,9 @@ type createRecipeRequest struct {
 	Description  string               `json:"description"`
 	Ingredients  string               `json:"ingredients"`
 	Instructions string               `json:"instructions"`
-	PrepTimeMin  int                  `json:"prepTimeMin"`
-	Servings     int                  `json:"servings"`
+	PrepTimeMin  int                  `json:"timeMinutes"`
 	Difficulty   int                  `json:"difficulty"`
+	Servings     int                  `json:"servings"`
 	Images       []recipeImageRequest `json:"images"`
 }
 
@@ -44,9 +44,9 @@ type updateRecipeRequest struct {
 	Description  string               `json:"description"`
 	Ingredients  string               `json:"ingredients"`
 	Instructions string               `json:"instructions"`
-	PrepTimeMin  int                  `json:"prepTimeMin"`
-	Servings     int                  `json:"servings"`
+	PrepTimeMin  int                  `json:"timeMinutes"`
 	Difficulty   int                  `json:"difficulty"`
+	Servings     int                  `json:"servings"`
 	Images       []recipeImageRequest `json:"images"`
 }
 
