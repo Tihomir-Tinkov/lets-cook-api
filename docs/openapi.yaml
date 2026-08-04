@@ -995,11 +995,6 @@ components:
           type: string
           enum:
             - success
-        data:
-          type:
-            - object
-            - "null"
-          description: Response payload
 
     ErrorResponse:
       type: object
