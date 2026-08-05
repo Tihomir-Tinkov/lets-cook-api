@@ -8,7 +8,7 @@ CREATE TABLE comments (
     body TEXT NOT NULL,
 
     rating INTEGER NOT NULL
-        CHECK (rating BETWEEN 1 AND 10),
+        CHECK (rating BETWEEN 1 AND 5),
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 

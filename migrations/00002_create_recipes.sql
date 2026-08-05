@@ -13,14 +13,14 @@ CREATE TABLE recipes (
     prep_time_min INTEGER NOT NULL
         CHECK (prep_time_min >= 0),
 
+    difficulty TEXT NOT NULL
+        CHECK (difficulty IN ('easy', 'medium', 'hard'))
+
     servings INTEGER NOT NULL
         CHECK (servings > 0),
 
-    difficulty INTEGER NOT NULL
-        CHECK (difficulty BETWEEN 1 AND 10),
-
     rating_avg NUMERIC(3,1) NOT NULL DEFAULT 0
-        CHECK (rating_avg BETWEEN 0 AND 10),
+        CHECK (rating_avg BETWEEN 0 AND 5),
 
     rating_count INTEGER NOT NULL DEFAULT 0
         CHECK (rating_count >= 0),

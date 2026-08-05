@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/responses"
-	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/dto"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/repositories"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/services"
 )
@@ -22,16 +22,6 @@ func NewCommentController(commentService *services.CommentService) *CommentContr
 	}
 }
 
-type createCommentRequest struct {
-	Body   string `json:"body"`
-	Rating int    `json:"rating"`
-}
-
-type updateCommentRequest struct {
-	Body   string `json:"body"`
-	Rating int    `json:"rating"`
-}
-
 func (c *CommentController) Create(w http.ResponseWriter, r *http.Request) {
 	auth, err := requireAuth(r)
 	if err != nil {
@@ -39,7 +29,7 @@ func (c *CommentController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req createCommentRequest
+	var req dto.CommentCreateRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
@@ -52,17 +42,14 @@ func (c *CommentController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment := models.Comment{
-		RecipeID: recipeID,
-		AuthorID: auth.UserID,
-		Body:     req.Body,
-		Rating:   req.Rating,
-	}
-
-	if err := c.commentService.Create(
+	comment, err := c.commentService.Create(
 		r.Context(),
-		&comment,
-	); err != nil {
+		recipeID,
+		auth.UserID,
+		req,
+	)
+
+	if err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
@@ -137,25 +124,22 @@ func (c *CommentController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req updateCommentRequest
+	var req dto.CommentUpdateRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	comment := models.Comment{
-		ID:     id,
-		Body:   req.Body,
-		Rating: req.Rating,
-	}
-
-	if err := c.commentService.Update(
+	comment, err := c.commentService.Update(
 		r.Context(),
 		recipeID,
 		auth.UserID,
-		&comment,
-	); err != nil {
+		id,
+		req,
+	)
+
+	if err != nil {
 		if errors.Is(err, services.ErrCommentForbidden) {
 			responses.JSONError(w, r, err, http.StatusForbidden)
 			return
@@ -165,7 +149,7 @@ func (c *CommentController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	responses.JSONResponse(w, http.StatusOK, comment)
 }
 
 func (c *CommentController) Delete(w http.ResponseWriter, r *http.Request) {

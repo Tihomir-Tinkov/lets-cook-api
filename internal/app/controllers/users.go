@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/responses"
-	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/dto"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/services"
 )
 
@@ -23,37 +23,15 @@ func NewUserController(userService *services.UserService) *UserController {
 	}
 }
 
-type registerRequest struct {
-	DisplayName string `json:"displayName"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-}
-
-type loginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type updateUserRequest struct {
-	DisplayName string `json:"displayName"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-}
-
 func (c *UserController) Register(w http.ResponseWriter, r *http.Request) {
-	var req registerRequest
+	var req dto.RegisterRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	user, err := c.userService.Register(
-		r.Context(),
-		req.DisplayName,
-		req.Email,
-		req.Password,
-	)
+	user, err := c.userService.Register(r.Context(), req)
 
 	if err != nil {
 		// Example:
@@ -72,27 +50,21 @@ func (c *UserController) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *UserController) Login(w http.ResponseWriter, r *http.Request) {
-	var req loginRequest
+	var req dto.LoginRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	token, err := c.userService.Login(
-		r.Context(),
-		req.Email,
-		req.Password,
-	)
+	login, err := c.userService.Login(r.Context(), req)
 
 	if err != nil {
 		responses.JSONError(w, r, err, http.StatusUnauthorized)
 		return
 	}
 
-	responses.JSONResponse(w, http.StatusOK, map[string]string{
-		"token": token,
-	})
+	responses.JSONResponse(w, http.StatusOK, login)
 }
 
 func (c *UserController) Logout(w http.ResponseWriter, r *http.Request) {
@@ -139,11 +111,7 @@ func (c *UserController) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responses.JSONResponse(
-		w,
-		http.StatusOK,
-		user,
-	)
+	responses.JSONResponse(w, http.StatusOK, user)
 }
 
 func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
@@ -169,30 +137,21 @@ func (c *UserController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req updateUserRequest
+	var req dto.UserUpdateRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	user := models.User{
-		ID:          auth.UserID,
-		DisplayName: req.DisplayName,
-		Email:       req.Email,
-	}
+	user, err := c.userService.Update(r.Context(), auth.UserID, req)
 
-	if err := c.userService.Update(
-		r.Context(),
-		auth.UserID,
-		&user,
-		req.Password,
-	); err != nil {
+	if err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	responses.JSONResponse(w, http.StatusOK, user)
 }
 
 func (c *UserController) Delete(w http.ResponseWriter, r *http.Request) {

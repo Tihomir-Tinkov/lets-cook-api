@@ -260,6 +260,24 @@ func (r *RecipeRepository) List(ctx context.Context, limit, offset int) ([]model
 	return recipes, nil
 }
 
+func (r *RecipeRepository) Count(ctx context.Context) (int, error) {
+	var count int
+
+	err := r.db.QueryRow(
+		ctx,
+		`
+		SELECT COUNT(*)
+		FROM recipes;
+		`, // WHERE difficulty = $1; // count query should use the same WHERE conditions as filter query
+	).Scan(&count)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 func (r *RecipeRepository) Update(ctx context.Context, recipe *models.Recipe) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {

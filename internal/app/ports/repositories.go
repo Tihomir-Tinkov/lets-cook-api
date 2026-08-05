@@ -20,6 +20,7 @@ type RecipeRepository interface {
 	Create(ctx context.Context, recipe *models.Recipe) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Recipe, error)
 	List(ctx context.Context, limit, offset int) ([]models.Recipe, error)
+	Count(ctx context.Context) (int, error)
 	Update(ctx context.Context, recipe *models.Recipe) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }

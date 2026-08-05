@@ -6,9 +6,8 @@ import (
 	"strconv"
 
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/controllers/responses"
-	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/dto"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/services"
-	"github.com/google/uuid"
 )
 
 var ErrInvalidRecipeID = errors.New("invalid recipe id")
@@ -23,53 +22,6 @@ func NewRecipeController(recipeService *services.RecipeService) *RecipeControlle
 	}
 }
 
-type recipeImageRequest struct {
-	ImageID      uuid.UUID `json:"imageId"`
-	DisplayOrder int       `json:"displayOrder"`
-}
-
-type recipeImageResponse struct {
-	ImageID      uuid.UUID `json:"imageId"`
-	URL          string    `json:"url"`
-	DisplayOrder int       `json:"displayOrder"`
-}
-
-/*
-type URLBuilder struct {
-	BaseURL string
-}
-
-func (b URLBuilder) URL(id uuid.UUID) string {
-	return fmt.Sprintf("%s/images/%s", b.BaseURL, id)
-}
-
-imageURLs := images.URLBuilder{
-	BaseURL: config.PublicURL,
-}
-*/
-
-type createRecipeRequest struct {
-	Title        string               `json:"title"`
-	Description  string               `json:"description"`
-	Ingredients  string               `json:"ingredients"`
-	Instructions string               `json:"instructions"`
-	PrepTimeMin  int                  `json:"timeMinutes"`
-	Difficulty   int                  `json:"difficulty"`
-	Servings     int                  `json:"servings"`
-	Images       []recipeImageRequest `json:"images"`
-}
-
-type updateRecipeRequest struct {
-	Title        string               `json:"title"`
-	Description  string               `json:"description"`
-	Ingredients  string               `json:"ingredients"`
-	Instructions string               `json:"instructions"`
-	PrepTimeMin  int                  `json:"timeMinutes"`
-	Difficulty   int                  `json:"difficulty"`
-	Servings     int                  `json:"servings"`
-	Images       []recipeImageRequest `json:"images"`
-}
-
 func (c *RecipeController) Create(w http.ResponseWriter, r *http.Request) {
 	auth, err := requireAuth(r)
 	if err != nil {
@@ -77,35 +29,16 @@ func (c *RecipeController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req createRecipeRequest
+	var req dto.RecipeCreateRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	recipe := models.Recipe{
-		AuthorID:     auth.UserID,
-		Title:        req.Title,
-		Description:  req.Description,
-		Ingredients:  req.Ingredients,
-		Instructions: req.Instructions,
-		PrepTimeMin:  req.PrepTimeMin,
-		Servings:     req.Servings,
-		Difficulty:   req.Difficulty,
-	}
+	recipe, err := c.recipeService.Create(r.Context(), auth.UserID, req)
 
-	for _, img := range req.Images {
-		recipe.Images = append(recipe.Images, models.RecipeImage{
-			ImageID:      img.ImageID,
-			DisplayOrder: img.DisplayOrder,
-		})
-	}
-
-	if err := c.recipeService.Create(
-		r.Context(),
-		&recipe,
-	); err != nil {
+	if err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
@@ -164,36 +97,16 @@ func (c *RecipeController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req updateRecipeRequest
+	var req dto.RecipeUpdateRequest
 
 	if err := decodeJSON(r, &req); err != nil {
 		responses.JSONError(w, r, err, http.StatusBadRequest)
 		return
 	}
 
-	recipe := models.Recipe{
-		ID:           id,
-		Title:        req.Title,
-		Description:  req.Description,
-		Ingredients:  req.Ingredients,
-		Instructions: req.Instructions,
-		PrepTimeMin:  req.PrepTimeMin,
-		Servings:     req.Servings,
-		Difficulty:   req.Difficulty,
-	}
+	recipe, err := c.recipeService.Update(r.Context(), id, auth.UserID, req)
 
-	for _, img := range req.Images {
-		recipe.Images = append(recipe.Images, models.RecipeImage{
-			ImageID:      img.ImageID,
-			DisplayOrder: img.DisplayOrder,
-		})
-	}
-
-	if err := c.recipeService.Update(
-		r.Context(),
-		auth.UserID,
-		&recipe,
-	); err != nil {
+	if err != nil {
 		if errors.Is(err, services.ErrRecipeForbidden) {
 			responses.JSONError(w, r, err, http.StatusForbidden)
 			return
@@ -203,7 +116,7 @@ func (c *RecipeController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	responses.JSONResponse(w, http.StatusOK, recipe)
 }
 
 func (c *RecipeController) Delete(w http.ResponseWriter, r *http.Request) {

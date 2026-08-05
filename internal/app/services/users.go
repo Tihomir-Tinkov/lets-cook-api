@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/dto"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/ports"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/repositories"
@@ -31,15 +32,20 @@ func NewUserService(repository ports.UserRepository, hasher ports.PasswordHasher
 	}
 }
 
-func (s *UserService) Register(ctx context.Context,
-	displayName string,
-	email string,
-	password string,
-) (*models.User, error) {
+func mapUserToResponse(user *models.User) *dto.UserResponse {
+	return &dto.UserResponse{
+		ID:          user.ID,
+		DisplayName: user.DisplayName,
+		Email:       user.Email,
+		Role:        user.Role,
+	}
+}
 
-	email = strings.ToLower(strings.TrimSpace(email))
+func (s *UserService) Register(ctx context.Context, req dto.RegisterRequest) (*dto.UserResponse, error) {
 
-	_, err := s.repository.GetByEmail(ctx, email)
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+
+	_, err := s.repository.GetByEmail(ctx, req.Email)
 
 	switch {
 	case err == nil:
@@ -50,113 +56,108 @@ func (s *UserService) Register(ctx context.Context,
 		return nil, err
 	}
 
-	hash, err := s.hasher.Hash(password)
+	hash, err := s.hasher.Hash(req.Password)
 
 	if err != nil {
 		return nil, err
 	}
 
 	user := &models.User{
-		DisplayName:  displayName,
-		Email:        email,
+		DisplayName:  req.DisplayName,
+		Email:        req.Email,
 		PasswordHash: hash,
 		Role:         models.RoleUser,
 	}
 
-	err = s.repository.Create(ctx, user)
-
-	if err != nil {
+	if err := s.repository.Create(ctx, user); err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return mapUserToResponse(user), nil
 }
 
-func (s *UserService) Login(
-	ctx context.Context,
-	email string,
-	password string,
-) (string, error) {
+func (s *UserService) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) {
 
-	email = strings.ToLower(strings.TrimSpace(email))
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 
-	user, err := s.repository.GetByEmail(ctx, email)
+	user, err := s.repository.GetByEmail(ctx, req.Email)
 
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserNotFound) {
-			return "", ErrInvalidCredentials
+			return nil, ErrInvalidCredentials
 		}
-		return "", err
+		return nil, err
 	}
 
 	err = s.hasher.Compare(
-		password,
+		req.Password,
 		user.PasswordHash,
 	)
 
 	if err != nil {
-		return "", ErrInvalidCredentials
+		return nil, ErrInvalidCredentials
 	}
 
 	token, err := s.tokens.Generate(user.ID, user.Role)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return &dto.LoginResponse{
+		User:  *mapUserToResponse(user),
+		Token: token,
+	}, nil
 }
 
-func (s *UserService) GetByID(
-	ctx context.Context,
-	id uuid.UUID,
-) (*models.User, error) {
-	return s.repository.GetByID(ctx, id)
-}
+func (s *UserService) GetByID(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error) {
+	user, err := s.repository.GetByID(ctx, id)
 
-func (s *UserService) Update(
-	ctx context.Context,
-	userID uuid.UUID,
-	user *models.User,
-	password string,
-) error {
-	//if user.ID != authUser.ID && authUser.Role != models.RoleAdmin
-	if user.ID != userID {
-		return ErrUnauthorized
+	if err != nil {
+		return nil, err
 	}
 
-	user.Email = strings.ToLower(
-		strings.TrimSpace(user.Email),
-	)
+	return mapUserToResponse(user), nil
+}
+
+func (s *UserService) Update(ctx context.Context, userID uuid.UUID, req dto.UserUpdateRequest) (*dto.UserResponse, error) {
+	user, err := s.repository.GetByID(ctx, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	user.DisplayName = req.DisplayName
+	user.Email = strings.ToLower(strings.TrimSpace(req.Email))
 
 	existing, err := s.repository.GetByEmail(ctx, user.Email)
 
 	if err == nil {
 		if existing.ID != user.ID {
-			return ErrEmailAlreadyExists
+			return nil, ErrEmailAlreadyExists
 		}
 	} else if !errors.Is(err, repositories.ErrUserNotFound) {
-		return err
+		return nil, err
 	}
 
-	if password != "" {
-		hash, err := s.hasher.Hash(password)
+	if req.Password != "" {
+		hash, err := s.hasher.Hash(req.Password)
 
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		user.PasswordHash = hash
 	}
 
-	return s.repository.Update(ctx, user)
+	if err := s.repository.Update(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return mapUserToResponse(user), nil
 }
 
-func (s *UserService) Delete(
-	ctx context.Context,
-	userID uuid.UUID,
-	id uuid.UUID,
-) error {
+func (s *UserService) Delete(ctx context.Context, userID uuid.UUID, id uuid.UUID) error {
 	if id != userID {
 		return ErrUnauthorized
 	}

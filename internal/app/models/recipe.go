@@ -6,6 +6,14 @@ import (
 	"github.com/google/uuid"
 )
 
+type Difficulty string
+
+const (
+	Easy   Difficulty = "easy"
+	Medium Difficulty = "medium"
+	Hard   Difficulty = "hard"
+)
+
 type Recipe struct {
 	ID           uuid.UUID     `json:"id" db:"id"`
 	AuthorID     uuid.UUID     `json:"authorId" db:"author_id"`
@@ -14,7 +22,7 @@ type Recipe struct {
 	Ingredients  string        `json:"ingredients" db:"ingredients"`
 	Instructions string        `json:"instructions" db:"instructions"`
 	PrepTimeMin  int           `json:"timeMinutes" db:"prep_time_min"`
-	Difficulty   int           `json:"difficulty" db:"difficulty"`
+	Difficulty   Difficulty    `json:"difficulty" db:"difficulty"`
 	Servings     int           `json:"servings" db:"servings"`
 	RatingAvg    float64       `json:"ratingAvg" db:"rating_avg"`
 	RatingCount  int           `json:"ratingCount" db:"rating_count"`

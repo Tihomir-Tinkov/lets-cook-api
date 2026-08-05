@@ -75,124 +75,6 @@ Authorization: Bearer {{token}}
 
 
 ################################
-# RECIPES
-################################
-
-### Get all recipes
-GET {{baseUrl}}/recipes
-
-
-### Create recipe with images
-# @name createRecipe
-POST {{baseUrl}}/recipes
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "title": "Spaghetti Carbonara",
-  "description": "Classic Italian pasta dish",
-  "ingredients": "Pasta, eggs, parmesan, pancetta, pepper",
-  "instructions": "Cook pasta. Mix eggs and cheese. Combine everything.",
-  "prepTimeMin": 30,
-  "servings": 4,
-  "difficulty": 5,
-  "images": [
-    {
-      "imageId": "{{imageId1}}",
-      "displayOrder": 0
-    },
-    {
-      "imageId": "{{imageId2}}",
-      "displayOrder": 1
-    }
-  ]
-}
-
-
-### Capture recipe ID
-@recipeId = {{createRecipe.response.body.data.id}}
-
-
-### Get recipe by ID (should include images)
-GET {{baseUrl}}/recipes/{{recipeId}}
-
-
-### Update recipe and reorder images
-PUT {{baseUrl}}/recipes/{{recipeId}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "title": "Updated Carbonara",
-  "description": "Updated description",
-  "ingredients": "Updated ingredients",
-  "instructions": "Updated instructions",
-  "prepTimeMin": 35,
-  "servings": 5,
-  "difficulty": 6,
-  "images": [
-    {
-      "imageId": "{{imageId2}}",
-      "displayOrder": 0
-    },
-    {
-      "imageId": "{{imageId1}}",
-      "displayOrder": 1
-    },
-    {
-      "imageId": "{{imageId3}}",
-      "displayOrder": 2
-    }
-  ]
-}
-
-
-### Delete recipe
-DELETE {{baseUrl}}/recipes/{{recipeId}}
-Authorization: Bearer {{token}}
-
-
-################################
-# COMMENTS
-################################
-
-### Get recipe comments
-GET {{baseUrl}}/recipes/{{recipeId}}/comments
-
-
-### Create comment
-# @name createComment
-POST {{baseUrl}}/recipes/{{recipeId}}/comments
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "body": "This recipe was amazing!",
-  "rating": 9
-}
-
-
-### Get comment
-GET {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
-
-
-### Update comment
-PUT {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "body": "Updated review text",
-  "rating": 10
-}
-
-
-### Delete comment
-DELETE {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
-Authorization: Bearer {{token}}
-
-
-################################
 # IMAGES
 ################################
 
@@ -256,4 +138,122 @@ GET {{baseUrl}}/images/{{imageId1}}
 
 ### Try deleting attached image
 DELETE {{baseUrl}}/images/{{imageId1}}
+Authorization: Bearer {{token}}
+
+
+################################
+# RECIPES
+################################
+
+### Get all recipes
+GET {{baseUrl}}/recipes
+
+
+### Create recipe with images
+# @name createRecipe
+POST {{baseUrl}}/recipes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Spaghetti Carbonara",
+  "description": "Classic Italian pasta dish",
+  "ingredients": "Pasta, eggs, parmesan, pancetta, pepper",
+  "instructions": "Cook pasta. Mix eggs and cheese. Combine everything.",
+  "timeMinutes": 30,
+  "servings": 4,
+  "difficulty": "medium",
+  "images": [
+    {
+      "imageId": "{{imageId1}}",
+      "displayOrder": 0
+    },
+    {
+      "imageId": "{{imageId2}}",
+      "displayOrder": 1
+    }
+  ]
+}
+
+
+### Capture recipe ID
+@recipeId = {{createRecipe.response.body.data.id}}
+
+
+### Get recipe by ID (should include images)
+GET {{baseUrl}}/recipes/{{recipeId}}
+
+
+### Update recipe and reorder images
+PUT {{baseUrl}}/recipes/{{recipeId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Carbonara",
+  "description": "Updated description",
+  "ingredients": "Updated ingredients",
+  "instructions": "Updated instructions",
+  "timeMinutes": 35,
+  "servings": 5,
+  "difficulty": "hard",
+  "images": [
+    {
+      "imageId": "{{imageId2}}",
+      "displayOrder": 0
+    },
+    {
+      "imageId": "{{imageId1}}",
+      "displayOrder": 1
+    },
+    {
+      "imageId": "{{imageId3}}",
+      "displayOrder": 2
+    }
+  ]
+}
+
+
+### Delete recipe
+DELETE {{baseUrl}}/recipes/{{recipeId}}
+Authorization: Bearer {{token}}
+
+
+################################
+# COMMENTS
+################################
+
+### Get recipe comments
+GET {{baseUrl}}/recipes/{{recipeId}}/comments
+
+
+### Create comment
+# @name createComment
+POST {{baseUrl}}/recipes/{{recipeId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "body": "This recipe was amazing!",
+  "rating": 5
+}
+
+
+### Get comment
+GET {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
+
+
+### Update comment
+PUT {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "body": "Updated review text",
+  "rating": 4
+}
+
+
+### Delete comment
+DELETE {{baseUrl}}/recipes/{{recipeId}}/comments/{{commentId}}
 Authorization: Bearer {{token}}

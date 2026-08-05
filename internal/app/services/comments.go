@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/dto"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/models"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/ports"
 	"github.com/Tihomir-Tinkov/lets-cook-api/internal/app/repositories"
@@ -14,7 +15,7 @@ import (
 var (
 	ErrInvalidComment   = errors.New("invalid comment")
 	ErrInvalidBody      = errors.New("comment body is required")
-	ErrInvalidRating    = errors.New("rating must be between 1 and 10")
+	ErrInvalidRating    = errors.New("rating must be between 1 and 5")
 	ErrCommentForbidden = errors.New("comment access forbidden")
 )
 
@@ -37,52 +38,94 @@ func validateComment(comment *models.Comment) error {
 		return ErrInvalidBody
 	}
 
-	if comment.Rating < 1 || comment.Rating > 10 {
+	if comment.Rating < 1 || comment.Rating > 5 {
 		return ErrInvalidRating
 	}
 
 	return nil
 }
 
-func (s *CommentService) Create(ctx context.Context, comment *models.Comment) error {
+func mapCommentToResponse(comment *models.Comment) *dto.CommentResponse {
+	return &dto.CommentResponse{
+		ID:       comment.ID,
+		RecipeID: comment.RecipeID,
+		AuthorID: comment.AuthorID,
+		Body:     comment.Body,
+		Rating:   comment.Rating,
+	}
+}
+
+func (s *CommentService) Create(ctx context.Context, recipeID uuid.UUID, userID uuid.UUID, req dto.CommentCreateRequest) (*dto.CommentResponse, error) {
+	comment := &models.Comment{
+		RecipeID: recipeID,
+		AuthorID: userID,
+		Body:     req.Body,
+		Rating:   req.Rating,
+	}
+
 	if err := validateComment(comment); err != nil {
-		return err
+		return nil, err
 	}
 
-	return s.repository.Create(ctx, comment)
-}
-
-func (s *CommentService) GetByID(ctx context.Context, id uuid.UUID) (*models.Comment, error) {
-	return s.repository.GetByID(ctx, id)
-}
-
-func (s *CommentService) GetByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]models.Comment, error) {
-	return s.repository.GetByRecipeID(ctx, recipeID)
-}
-
-func (s *CommentService) Update(ctx context.Context, recipeID uuid.UUID, userID uuid.UUID, comment *models.Comment) error {
-	if err := validateComment(comment); err != nil {
-		return err
+	if err := s.repository.Create(ctx, comment); err != nil {
+		return nil, err
 	}
 
-	if comment.ID == uuid.Nil {
-		return ErrInvalidComment
-	}
+	return mapCommentToResponse(comment), nil
+}
 
-	existing, err := s.repository.GetByID(ctx, comment.ID)
+func (s *CommentService) GetByID(ctx context.Context, id uuid.UUID) (*dto.CommentResponse, error) {
+	comment, err := s.repository.GetByID(ctx, id)
+
 	if err != nil {
-		return err
+		return nil, err
+	}
+
+	return mapCommentToResponse(comment), nil
+}
+
+func (s *CommentService) GetByRecipeID(ctx context.Context, recipeID uuid.UUID) ([]dto.CommentResponse, error) {
+	comments, err := s.repository.GetByRecipeID(ctx, recipeID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]dto.CommentResponse, 0, len(comments))
+
+	for _, comment := range comments {
+		result = append(result, *mapCommentToResponse(&comment))
+	}
+
+	return result, nil
+}
+
+func (s *CommentService) Update(ctx context.Context, recipeID uuid.UUID, userID uuid.UUID, commentID uuid.UUID, req dto.CommentUpdateRequest) (*dto.CommentResponse, error) {
+	existing, err := s.repository.GetByID(ctx, commentID)
+	if err != nil {
+		return nil, err
 	}
 
 	if existing.RecipeID != recipeID {
-		return repositories.ErrCommentNotFound
+		return nil, repositories.ErrCommentNotFound
 	}
 
 	if existing.AuthorID != userID {
-		return ErrCommentForbidden
+		return nil, ErrCommentForbidden
 	}
 
-	return s.repository.Update(ctx, comment)
+	existing.Body = req.Body
+	existing.Rating = req.Rating
+
+	if err := validateComment(existing); err != nil {
+		return nil, err
+	}
+
+	if err := s.repository.Update(ctx, existing); err != nil {
+		return nil, err
+	}
+
+	return mapCommentToResponse(existing), nil
 }
 
 func (s *CommentService) Delete(ctx context.Context, recipeID uuid.UUID, userID uuid.UUID, id uuid.UUID) error {
