@@ -14,7 +14,7 @@ CREATE TABLE recipes (
         CHECK (prep_time_min >= 0),
 
     difficulty TEXT NOT NULL
-        CHECK (difficulty IN ('easy', 'medium', 'hard'))
+        CHECK (difficulty IN ('easy', 'medium', 'hard')),
 
     servings INTEGER NOT NULL
         CHECK (servings > 0),
