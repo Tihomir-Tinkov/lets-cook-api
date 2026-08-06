@@ -5,7 +5,7 @@ CREATE TABLE comments (
     recipe_id UUID NOT NULL,
     author_id UUID NOT NULL,
 
-    body TEXT NOT NULL,
+    content TEXT NOT NULL,
 
     rating INTEGER NOT NULL
         CHECK (rating BETWEEN 1 AND 5),

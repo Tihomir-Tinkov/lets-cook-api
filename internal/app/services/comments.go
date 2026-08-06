@@ -14,7 +14,7 @@ import (
 
 var (
 	ErrInvalidComment   = errors.New("invalid comment")
-	ErrInvalidBody      = errors.New("comment body is required")
+	ErrInvalidContent   = errors.New("comment text is required")
 	ErrInvalidRating    = errors.New("rating must be between 1 and 5")
 	ErrCommentForbidden = errors.New("comment access forbidden")
 )
@@ -34,8 +34,8 @@ func validateComment(comment *models.Comment) error {
 		return ErrInvalidComment
 	}
 
-	if strings.TrimSpace(comment.Body) == "" {
-		return ErrInvalidBody
+	if strings.TrimSpace(comment.Content) == "" {
+		return ErrInvalidContent
 	}
 
 	if comment.Rating < 1 || comment.Rating > 5 {
@@ -50,7 +50,7 @@ func mapCommentToResponse(comment *models.Comment) *dto.CommentResponse {
 		ID:       comment.ID,
 		RecipeID: comment.RecipeID,
 		AuthorID: comment.AuthorID,
-		Body:     comment.Body,
+		Content:  comment.Content,
 		Rating:   comment.Rating,
 	}
 }
@@ -59,7 +59,7 @@ func (s *CommentService) Create(ctx context.Context, recipeID uuid.UUID, userID 
 	comment := &models.Comment{
 		RecipeID: recipeID,
 		AuthorID: userID,
-		Body:     req.Body,
+		Content:  req.Content,
 		Rating:   req.Rating,
 	}
 
@@ -114,7 +114,7 @@ func (s *CommentService) Update(ctx context.Context, recipeID uuid.UUID, userID 
 		return nil, ErrCommentForbidden
 	}
 
-	existing.Body = req.Body
+	existing.Content = req.Content
 	existing.Rating = req.Rating
 
 	if err := validateComment(existing); err != nil {

@@ -234,7 +234,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "body": "This recipe was amazing!",
+  "content": "This recipe was amazing!",
   "rating": 5
 }
 
@@ -249,7 +249,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "body": "Updated review text",
+  "content": "Updated review text",
   "rating": 4
 }
 

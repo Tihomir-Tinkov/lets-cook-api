@@ -61,7 +61,7 @@ func (r *CommentRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.
 			id,
     		recipe_id,
 			author_id,
-			body,
+			content,
 			rating,
 			created_at,
 			updated_at
@@ -98,7 +98,7 @@ func (r *CommentRepository) GetByRecipeID(ctx context.Context, recipeID uuid.UUI
 			id,
 			recipe_id,
 			author_id,
-			body,
+			content,
 			rating,
 			created_at,
 			updated_at
@@ -136,13 +136,13 @@ func (r *CommentRepository) Create(ctx context.Context, comment *models.Comment)
 		`INSERT INTO comments (
 			recipe_id,
 			author_id,
-			body,
+			content,
 			rating
 		 ) VALUES ($1,$2,$3,$4)
 		 RETURNING id, created_at, updated_at`,
 		comment.RecipeID,
 		comment.AuthorID,
-		comment.Body,
+		comment.Content,
 		comment.Rating,
 	).Scan(
 		&comment.ID,
@@ -172,13 +172,13 @@ func (r *CommentRepository) Update(ctx context.Context, comment *models.Comment)
 		ctx,
 		`UPDATE comments
 		 SET
-			body = $2,
+			content = $2,
 			rating = $3,
 			updated_at = NOW()
 		 WHERE id = $1
 		 RETURNING recipe_id, updated_at`,
 		comment.ID,
-		comment.Body,
+		comment.Content,
 		comment.Rating,
 	).Scan(&comment.RecipeID, &comment.UpdatedAt)
 
