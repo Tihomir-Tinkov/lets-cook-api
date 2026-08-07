@@ -47,47 +47,14 @@ Schema -> Migration -> Model -> Port -> Repository -> Service -> Controller -> R
 
 ## 7.Frontend
 
-https://openapi-ts.dev/introduction
-
+- SvelteKit
+  - components https://www.shadcn-svelte.com/docs
 - TypeScript
-- Svelte/Kit
-  - https://flowbite-svelte.com/
-  - https://melt-ui.com/
-  - https://sveltematerialui.com/
-  - https://www.bits-ui.com/
-  - https://www.shadcn-svelte.com/
-  - https://www.skeleton.dev/
-- (React)
-  - https://ant.design/
-  - https://chakra-ui.com/
-  - https://mantine.dev/
-  - https://mui.com/material-ui/
-  - https://ui.shadcn.com/
-  - https://www.radix-ui.com/
-- framework-agnostic
-  - https://daisyui.com/
-  - https://lucide.dev/icons/
+  - types https://openapi-ts.dev/introduction
 - Tailwind CSS
 
+https://zod.dev/ https://superforms.rocks/ ?
 
-At this point you have:
+## 8. Deployment
 
-✅ SvelteKit
-✅ TypeScript
-✅ Tailwind CSS v4
-✅ shadcn-svelte
-✅ Luma design preset
-✅ OpenAPI-generated types
-
-That's a solid modern frontend stack.
-
-Next things I'd do:
-
-Add a RecipeGrid.svelte component and move the {#each} there.
-Add a homepage structure:
-hero/title
-search bar
-recipe grid
-Replace the emoji metadata with Lucide icons and shadcn Badge.
-
-But first, let's get the current cards rendering. Let me know if the three cards appear.
+GitHub Actions -> Docker container -> Docker Compose

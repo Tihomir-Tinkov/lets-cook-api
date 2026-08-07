@@ -51,11 +51,11 @@ func NewImageService(repository ports.ImageRepository, storage ports.FileStorage
 func (s *ImageService) Upload(
 	ctx context.Context,
 	req UploadRequest,
-) (uuid.UUID, error) {
+) (*models.Image, error) {
 
 	detectedFile, err := DetectFile(req.Reader)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	image := &models.Image{
@@ -67,7 +67,7 @@ func (s *ImageService) Upload(
 
 	err = s.repository.Create(ctx, image)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	err = s.storage.Save(
@@ -80,10 +80,10 @@ func (s *ImageService) Upload(
 		// cleanup DB row because storage failed
 		_ = s.repository.Delete(ctx, image.ID)
 
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return image.ID, nil
+	return image, nil
 }
 
 func (s *ImageService) Download(
